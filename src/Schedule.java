@@ -17,7 +17,8 @@ import java.util.List;
 * of this 
 */
 public class Schedule {
-    // timeBlocks is going to be a generic list for now. We want to store
+    
+	// timeBlocks is going to be a generic list for now. We want to store
     // multiple so any data structure which does that will work. However,
     // we may also want to look into having a consistant way of sorting these.
     private List<TimeBlock> timeBlocks;
@@ -29,8 +30,10 @@ public class Schedule {
     private LocalDateTime endTime;
 
     // Constructor
-    public Schedule() {
+    public Schedule(LocalDateTime startTime, LocalDateTime endTime) {
         this.timeBlocks = new ArrayList<>();
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
     // Getters
@@ -83,14 +86,18 @@ public class Schedule {
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
     }
-
+    
     // Methods
     // Add a timeblock but do not reschedule anything. We can add the timeblock
     // anywhere on the list. But we may want to look into inserting in an
     // ordered way.
     public void addTimeBlock(TimeBlock timeBlock) {
         // TODO: maybe add the timeblock but keep the list sorted by star time.
-        timeBlocks.add(timeBlock);
+        for (int i = 0; i < timeBlocks.size(); i++) {
+        	if (timeBlocks.get(i).getStartTime().isAfter(timeBlock.getStartTime())) {
+        		timeBlocks.add(i, timeBlock);
+        	}
+        }
     }
 
     // Remove a task from the schedule and its associated timeblock. Whether
@@ -113,17 +120,49 @@ public class Schedule {
     // Check if our current schedule is valid. Valid is determined by whether it
     // lies inside our schedule and no timeblock overlaps another timeblock.
     public boolean isValid() {
-        // TODO: fill in with logic to determine if the current schedule is valid
-        return false;
+    	
+    	// any blocks outside the bounds of the schedule?
+    	if (!timeBlocks.isEmpty()) {
+    		if (timeBlocks.get(0).getStartTime().isBefore(startTime) ||
+    			timeBlocks.get(timeBlocks.size() - 1).getEndTime().isAfter(endTime)) {
+    			return false;
+		   	}
+    	}
+    	
+    	// any blocks overlapping each other?
+    	for (int i = 1; i < timeBlocks.size(); i++) {
+    	   if (timeBlocks.get(i - 1).getEndTime().isAfter(timeBlocks.get(i).getStartTime())) {
+    		   return false;
+    	   }
+    	}
+       
+    	return true;
     }
 
     // Add a task to the schedule. The task should automatically make the
     // TimeBlock necessary to insert itself into the schedule.
     public void addTask(Task task) {
-        // TODO: fill in the logic to add a task to the schedule
-        // Adding a task will require it to be inside of a TimeBlock
-        // The duration of that timeblock can roughly be determined by the
-        // task's estimated time.
+
+    	// initial algorithm is greedy and just adds the task wherever there is room
+    	if (timeBlocks.isEmpty()) {
+    		if (startTime.plusHours((long) task.getEstimatedTime()).isAfter(endTime)) {
+    			System.out.println("No room to add task " + task.getDescription());
+    		}
+    		else {
+        		timeBlocks.add(new TimeBlock(task, startTime, startTime.plusHours((long) task.getEstimatedTime())));
+    		}
+    		return;
+    	}
+    	
+    	// find out if there is room for the new task
+    	TimeBlock lastTimeBlock = timeBlocks.get(timeBlocks.size() - 1);
+		LocalDateTime newEndTime = lastTimeBlock.getEndTime().plusHours((long) task.getEstimatedTime());
+    	if (newEndTime.isAfter(endTime)) {
+    		System.out.println("No room to add task " + task.getDescription());
+    	}
+    	
+    	// add the new task
+    	timeBlocks.add(new TimeBlock(task, lastTimeBlock.getEndTime(), newEndTime));
     }
 
     @Override
