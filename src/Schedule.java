@@ -7,7 +7,6 @@
  * rather it's about whether it gets scheduled correctly.
  */
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,7 @@ public class Schedule {
     
 	// timeBlocks is going to be a generic list for now. We want to store
     // multiple so any data structure which does that will work. However,
-    // we may also want to look into having a consistant way of sorting these.
+    // we may also want to look into having a consistent way of sorting these.
     private List<TimeBlock> timeBlocks;
 
     // Start and end times will help with future algorithms for load
@@ -58,48 +57,50 @@ public class Schedule {
         if (timeBlocks.isEmpty()) {
             return null;
         }
-        // TODO: get earliest not by insertion order but by start time.
+        
         return timeBlocks.get(0).getTask();
-    }
-    // TODO: maybe there should also be a getEarliestTimeBlock alternative
-
-    /*
-     * Calculate the total duration of the timeblocks.
-     */
-    public Duration getTotalDuration() {
-        Duration total = Duration.ZERO;
-        for (TimeBlock block : timeBlocks) {
-            total = total.plus(block.getDuration());
-        }
-        return total;
     }
     
     // TODO: maybe also calculate the total duration of estimated time from the tasks?
 
     // Setters
-    // Set the start time but do not reschedule anything.
+    // Set the start time, reschedule blocks if needed
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
-    }
-
-    // Set the end time but do not reschedule anything.
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-    
-    // Methods
-    // Add a timeblock but do not reschedule anything. We can add the timeblock
-    // anywhere on the list. But we may want to look into inserting in an
-    // ordered way.
-    public void addTimeBlock(TimeBlock timeBlock) {
-        // TODO: maybe add the timeblock but keep the list sorted by star time.
-        for (int i = 0; i < timeBlocks.size(); i++) {
-        	if (timeBlocks.get(i).getStartTime().isAfter(timeBlock.getStartTime())) {
-        		timeBlocks.add(i, timeBlock);
+        if (!isValid()) {
+        	
+        	// save the tasks and delete them all
+        	List<TimeBlock> oldBlocks = timeBlocks;
+        	while (!timeBlocks.isEmpty()) {
+        		timeBlocks.remove(0);
+        	}
+        	
+        	// re-add the tasks to get them back in valid positions
+        	for (TimeBlock timeblock : oldBlocks) {
+        		addTask(timeblock.getTask());
         	}
         }
     }
 
+    // Set the end time, reschedule blocks if needed
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+        if (!isValid()) {
+        	
+        	// save the tasks and delete them all
+        	List<TimeBlock> oldBlocks = timeBlocks;
+        	while (!timeBlocks.isEmpty()) {
+        		timeBlocks.remove(0);
+        	}
+        	
+        	// re-add the tasks to get them back in valid positions
+        	for (TimeBlock timeblock : oldBlocks) {
+        		addTask(timeblock.getTask());
+        	}
+        }
+    }
+    
+    // Methods
     // Remove a task from the schedule and its associated timeblock. Whether
     // the schedule is rescheduled doesn't matter here. Although there isn't
     // much of a point except for load balancing the schedule.
@@ -112,9 +113,20 @@ public class Schedule {
     // schedules. Additionally, the tasks will have to be rescheduled in such
     // a way that it is valid again (it likely will be invalid after merging).
     public void mergeWith(Schedule schedule) {
-        // TODO: merge the start and end times
-        timeBlocks.addAll(schedule.getTimeBlocks());
-        // TODO: reschedule tasks if it is invalid to bring it back to a valid state
+        
+    	// add each time block from the other schedule into this one; add task will take care
+    	// of rearranging blocks to keep the schedule valid if needed
+    	for (TimeBlock timeblock : schedule.getTimeBlocks()) {
+        	addTask(timeblock.getTask());
+        }
+    	
+    	// expand the time constraints if needed
+    	if (schedule.getStartTime().isBefore(getStartTime())) {
+    		setStartTime(schedule.getStartTime());
+    	}
+    	if (schedule.getEndTime().isAfter(getEndTime())) {
+    		setEndTime(schedule.getEndTime());
+    	}
     }
 
     // Check if our current schedule is valid. Valid is determined by whether it
@@ -167,10 +179,12 @@ public class Schedule {
 
     @Override
     public String toString() {
-        return "Schedule{" +
-                "timeBlocks=" + timeBlocks +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
-                '}';
+        
+    	String retval = "";
+        for (TimeBlock timeblock : timeBlocks) {
+        	retval += timeblock.getTask().getDescription() + ": " + 
+        			  timeblock.getStartTime() + " - " + timeblock.getEndTime() + "\n";
+        }
+        return retval.substring(0, retval.length() - 1);
     }
 }
