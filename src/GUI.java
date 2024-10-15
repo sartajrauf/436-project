@@ -17,6 +17,9 @@ public class GUI extends Application {
     private Schedule schedule;
 
     @Override
+    // Did ChatGPT make this code? Yes. It's slightly modified to work with
+    // our setup and to be frank it's either that or copying a template from
+    // w3schools or geeksforgeeks
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Weekly Calendar");
 
