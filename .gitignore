@@ -1,2 +1,3 @@
-lib/junit-platform-console-standalone-1.11.1.jar
+/lib/ 
 /bin/
+/.vscode/
