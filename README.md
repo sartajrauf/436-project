@@ -1,4 +1,4 @@
 # 436-project
 
 Authors:
-Ivan, Ryan, ,
+Ivan, Ryan, Pedro,
