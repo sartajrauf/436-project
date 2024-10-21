@@ -10,6 +10,10 @@
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import java.util.Optional;
 
 /*
 * Schedule contains the TimeBlock and Task as well as a start time and end time
@@ -153,17 +157,19 @@ public class Schedule {
 
     // Add a task to the schedule. The task should automatically make the
     // TimeBlock necessary to insert itself into the schedule.
-    public void addTask(Task task) {
+    public TimeBlock addTask(Task task) {
 
     	// initial algorithm is greedy and just adds the task wherever there is room
     	if (timeBlocks.isEmpty()) {
     		if (startTime.plusHours((long) task.getEstimatedTime()).isAfter(endTime)) {
     			System.out.println("No room to add task " + task.getDescription());
+                return null;
     		}
     		else {
-        		timeBlocks.add(new TimeBlock(task, startTime, startTime.plusHours((long) task.getEstimatedTime())));
+                TimeBlock timeBlock = new TimeBlock(task, startTime, startTime.plusHours((long) task.getEstimatedTime()));
+        		timeBlocks.add(timeBlock);
+                return timeBlock;
     		}
-    		return;
     	}
     	
     	// find out if there is room for the new task
@@ -171,10 +177,13 @@ public class Schedule {
 		LocalDateTime newEndTime = lastTimeBlock.getEndTime().plusHours((long) task.getEstimatedTime());
     	if (newEndTime.isAfter(endTime)) {
     		System.out.println("No room to add task " + task.getDescription());
+            return null;
     	}
     	
     	// add the new task
-    	timeBlocks.add(new TimeBlock(task, lastTimeBlock.getEndTime(), newEndTime));
+        TimeBlock timeBlock = new TimeBlock(task, lastTimeBlock.getEndTime(), newEndTime);
+    	timeBlocks.add(timeBlock);
+        return timeBlock;
     }
 
     @Override
