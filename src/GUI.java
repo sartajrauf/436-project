@@ -1,16 +1,19 @@
 import java.time.LocalDateTime;
-import java.util.List;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 public class GUI extends Application {
@@ -20,30 +23,38 @@ public class GUI extends Application {
     private static final String[] DAYS = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
             "Saturday" };
 
-    private Schedule schedule;
+    // backing structures
+    Calendar calendar = new Calendar(LocalDateTime.of(2024, 10, 20, 0, 0, 0));
+    CalendarWeek currentWeek = calendar.getCurrentWeek();
+
+    // decorative elements
+    Label title = new Label(currentWeek.getTimeframeString());
+
+    // organization elements
+    GridPane window = new GridPane();
+    GridPane titleGrid = new GridPane();
+    ScrollPane scheduleScroller = new ScrollPane();
+    GridPane scheduleGrid = new GridPane();
+
+    // interactive elements
+    private Button previousWeekButton = new Button("<");
+    private Button nextWeekButton = new Button(">");
 
     @Override
     public void start(Stage primaryStage) {
-
-        // Create a sample schedule
-        schedule = new Schedule(LocalDateTime.now(), LocalDateTime.now().plusDays(7));
-
-        // Add some sample tasks
-        schedule.addTask(new Task("Team Meeting", 1));
-        schedule.addTask(new Task("Project Work", 3));
-        schedule.addTask(new Task("Lunch Break", 1));
         
         primaryStage.setTitle("Weekly Calendar");
-        GridPane window = new GridPane();
 
         // add the title; the title will always be 100px tall
-        Label title = new Label("Week of October 20 - October 26, 2024");
-        title.setAlignment(Pos.CENTER);
+        titleGrid.setHgap(20);
+        titleGrid.add(previousWeekButton, 0, 0);
         title.setFont(new Font(30));
-        window.add(title, 0, 0);
+        title.setTextAlignment(TextAlignment.CENTER);
+        titleGrid.add(title, 1, 0);
+        titleGrid.add(nextWeekButton, 2, 0);
+        window.add(titleGrid, 0, 0 );
 
-        // add the visual pane; the visual pane will always take up as much space as possible
-        GridPane scheduleGrid = new GridPane();
+        // add the schedule pane; the schedule pane will always take up as much space as possible
         scheduleGrid.setHgap(5);
         scheduleGrid.setVgap(5);
         scheduleGrid.setPadding(new Insets(5, 0, 5, 0));
@@ -63,29 +74,27 @@ public class GUI extends Application {
                 Label slot = new Label();
                 slot.setPrefWidth(Double.MAX_VALUE);
                 slot.setStyle("-fx-border-color: black; -fx-min-width: 60px; -fx-min-height: 30px;");
-                scheduleGrid.add(slot, day + 1, hour + 1); // Add empty slots for each hour and day
-
-                // Check for tasks in the current hour
-                List<TimeBlock> timeblocks = schedule.getTimeBlocks();
-                for (TimeBlock timeblock : timeblocks) {
-                    Task task = timeblock.getTask();
-                    
-                    // Assume each task starts at the beginning of the hour for this example
-                    if (dateLiesBetween(schedule.getStartTime().plusDays(day).plusHours(hour), timeblock.getStartTime(),
-                            timeblock.getEndTime())) {
-                        slot.setText(task.getDescription()); // Display the task description
+                slot.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent event) {
+                        if (!slot.getText().equals("")) {
+                            System.out.println("I have been clicked: " + slot.getText());
+                        }
+                        else {
+                            System.out.println("I have been clicked: <empty>" );
+                        }
                     }
-                }
+                });
+                scheduleGrid.add(slot, day + 1, hour + 1); // Add empty slots for each hour and day
             }
         }
 
         // add the grid pane to a scroll pane so that if the window gets too small, it gets a scroll bar
-        ScrollPane scheduleScroller = new ScrollPane();
         scheduleScroller.setContent(scheduleGrid);
         scheduleScroller.setFitToWidth(true);
         window.add(scheduleScroller, 0, 1);    
         
-        // add the options pane and all element inside it; the options pane will always bu 200px tall
+        // add the action pane and all element inside it; the action pane will always bu 200px tall
         window.add(new Label("Options"), 0, 2);
 
         Scene scene = new Scene(window, 1000, 900);
@@ -97,28 +106,22 @@ public class GUI extends Application {
 
         // set initial sizes for the screen elements and set up listeners so that the sizes dynamically
         // update if the user resizes the screen
-        setElementSizes(window, scheduleGrid);
+        setElementSizes();
         primaryStage.widthProperty().addListener((obs, oldVal, newVal) -> {
-            setElementSizes(window, scheduleGrid);
+            setElementSizes();
         });
         primaryStage.heightProperty().addListener((obs, oldVal, newVal) -> {
-            setElementSizes(window, scheduleGrid);
+            setElementSizes();
         });
         primaryStage.maximizedProperty().addListener((obs, oldVal, newVal) -> {
             // this isn't working for some reason, will figure it out later
-            setElementSizes(window, scheduleGrid);
+            setElementSizes();
         });
-    }
-
-    // inclusive dateStart, exclusive dateEnd
-    private boolean dateLiesBetween(LocalDateTime dateBetween, LocalDateTime dateStart, LocalDateTime dateEnd) {
-        return (dateBetween.isAfter(dateStart) || dateBetween.isEqual(dateStart)) &&
-                (dateBetween.isBefore(dateEnd));
     }
 
     // sets the dimensions that elements must conform to to fit nicely on the screen; this function will be
     // callled automatically every time the user resizes the screen
-    private void setElementSizes(GridPane window, GridPane scheduleGrid) {
+    private void setElementSizes() {
 
         while (!window.getRowConstraints().isEmpty()) {
             window.getRowConstraints().remove(0);
@@ -133,18 +136,34 @@ public class GUI extends Application {
         window.getColumnConstraints().add(new ColumnConstraints(window.getWidth()));
         window.getColumnConstraints().add(new ColumnConstraints(window.getWidth()));
 
+        while (!titleGrid.getColumnConstraints().isEmpty()) {
+            titleGrid.getColumnConstraints().remove(0);
+        }
+        ColumnConstraints rightAlignButton = new ColumnConstraints((window.getWidth() - 335) / 2);
+        rightAlignButton.setHalignment(HPos.RIGHT);
+        titleGrid.getColumnConstraints().add(rightAlignButton);
+        titleGrid.getColumnConstraints().add(new ColumnConstraints(335));
+        ColumnConstraints leftAlignButton = new ColumnConstraints((window.getWidth() - 335) / 2);
+        leftAlignButton.setHalignment(HPos.LEFT);
+        titleGrid.getColumnConstraints().add(leftAlignButton);
+
         while (!scheduleGrid.getColumnConstraints().isEmpty()) {
             scheduleGrid.getColumnConstraints().remove(0);
         }
         for (int i = 0; i < 8; i++) {
             if (i == 0) {
                 scheduleGrid.getColumnConstraints().add(new ColumnConstraints(50));
-
             }
             else {
                 scheduleGrid.getColumnConstraints().add(new ColumnConstraints((window.getWidth() - 110) / 7));
             }
         }
+    }
+
+    // inclusive dateStart, exclusive dateEnd
+    private boolean dateLiesBetween(LocalDateTime dateBetween, LocalDateTime dateStart, LocalDateTime dateEnd) {
+        return (dateBetween.isAfter(dateStart) || dateBetween.isEqual(dateStart)) &&
+            (dateBetween.isBefore(dateEnd));
     }
 
     public static void main(String[] args) {

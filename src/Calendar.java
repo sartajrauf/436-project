@@ -5,11 +5,34 @@ import java.util.List;
 public class Calendar {
 
 	private List<CalendarWeek> calendarWeeks;
-	
+	private CalendarWeek currentWeek;
+
 	public Calendar(LocalDateTime startTime) {
 		
 		this.calendarWeeks = new LinkedList<>();
 		this.calendarWeeks.add(new CalendarWeek(startTime));
+		this.currentWeek = calendarWeeks.get(0);
+	}
+
+	public CalendarWeek getCurrentWeek() {
+		return currentWeek;
+	}
+
+	public void setCurrentWeek(CalendarWeek newWeek) {
+		calendarWeeks.set(calendarWeeks.indexOf(currentWeek), newWeek);
+		currentWeek = newWeek;
+	}
+
+	public void forwardOneWeek() {
+		if (calendarWeeks.indexOf(currentWeek) < calendarWeeks.size() - 1) {
+			currentWeek = calendarWeeks.get(calendarWeeks.indexOf(currentWeek) + 1);
+		}
+	}
+
+	public void backOneWeek() {
+		if (calendarWeeks.indexOf(currentWeek) != 0) {
+			currentWeek = calendarWeeks.get(calendarWeeks.indexOf(currentWeek) - 1);
+		}
 	}
 	
 	public void addNextWeek() {

@@ -6,11 +6,16 @@ public class CalendarWeek {
 
 	private Schedule weekSchedule;
 	private LocalDateTime startTime;
+	private LocalDateTime endTime;
+	private String timeframeString;
 	
 	CalendarWeek(LocalDateTime startTime) {
 		
 		this.weekSchedule = new Schedule(startTime, startTime.plusDays(7));
 		this.startTime = startTime;
+		this.endTime = startTime.plusDays(7);
+		this.timeframeString = startTime.getMonthValue() + "/" + startTime.getDayOfMonth() + "/" + startTime.getYear() + 
+							   " - " + endTime.getMonthValue() + "/" + endTime.getDayOfMonth() + "/" + endTime.getYear();
 	}
 	
 	public Schedule getSchedule() {
@@ -19,6 +24,14 @@ public class CalendarWeek {
 	
 	public LocalDateTime getStartTime() {
 		return startTime;
+	}
+
+	public LocalDateTime getEndTime() {
+		return endTime;
+	}
+
+	public String getTimeframeString() {
+		return timeframeString;
 	}
 	
 	public List<TimeBlock> getTasksByDay(int day) {
