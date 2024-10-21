@@ -1,10 +1,15 @@
 @echo off
 
-REM README; Only run this script when initially setting up the vscode
-REM environment for the fist time. This script will download javafx
-REM and setup the correct environment. Making sure the program can be run
-REM using the run and debug tools. The necessary lib will be acquired and
-REM linked as a module.
+REM README: Only run this script when initially setting up the vscode
+REM environment for the first time. This script will download JavaFX,
+REM JUnit, and ensure Java 21 is set up correctly in the VSCode environment.
+
+if not "%java_version%"=="21" (
+    echo WARNING Java 21 is required, but version %java_version% was detected.
+    echo Please make sure you configure vscode to use Java 21. This can be
+    echo done by editing the classpath using
+    echo View > Command Palette... > Java: Configure Classpath > JDK Runtime > JavaSE-21
+)
 
 REM Create necessary directories
 mkdir ".\lib"
@@ -45,9 +50,28 @@ echo         "./src" >> ".\.vscode\settings.json"
 echo     ] >> ".\.vscode\settings.json"
 echo } >> ".\.vscode\settings.json"
 
+REM Define the JUnit Platform Console Standalone dependency URL
+set "junitConsoleVersion=1.11.1"
+set "dependencyUrl=https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/%junitConsoleVersion%/junit-platform-console-standalone-%junitConsoleVersion%.jar"
+
+REM Download the dependency
+powershell -Command "Invoke-WebRequest -Uri '%dependencyUrl%' -OutFile 'lib\junit-platform-console-standalone-%junitConsoleVersion%.jar'"
+
+REM Output a message indicating completion
+echo JUnit Platform Console Standalone has been downloaded to lib\
+
+REM Check if .classpath exists and rename it to .classpath.DISABLED
+if exist ".classpath" (
+    ren ".classpath" ".classpath.DISABLED"
+    echo Found .classpath file. Renamed to .classpath.DISABLED.
+) else (
+    echo No .classpath file found. That is OK.
+)
+
 echo Cleaning up...
 
 REM Clean up the downloaded zip file
 del openjfx-21.0.1_windows-x64_bin-sdk.zip
 
 echo Done.
+pause
