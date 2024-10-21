@@ -1,3 +1,4 @@
+package model;
 
 /**
  * The Schedule contains all the TimeBlocks with our Tasks. The Schedule can

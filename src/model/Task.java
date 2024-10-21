@@ -1,3 +1,4 @@
+package model;
 /**
  * This is the Task class. It probably will not get that eventful here.
  * We need it to contain all the data for the task itself. Whatever the user

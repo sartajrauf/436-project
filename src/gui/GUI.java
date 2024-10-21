@@ -1,3 +1,4 @@
+package gui;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -20,6 +21,12 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import model.Calendar;
+import model.CalendarWeek;
+import model.Schedule;
+import model.Task;
+import model.TimeBlock;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

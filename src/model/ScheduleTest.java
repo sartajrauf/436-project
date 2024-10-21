@@ -1,3 +1,4 @@
+package model;
 
 /**
  * These tests are primarily to ensure that the schedule is able to schedule

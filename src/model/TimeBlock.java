@@ -1,3 +1,4 @@
+package model;
 
 /**
  * TimeBlock is our capsule for our task. It is the interface between

@@ -1,3 +1,4 @@
+package model;
 /**
  * Test cases for TimeBlocks. I won't go into detail since it's fairly simple.
  * The testcases should be modified to reflect any new features.
