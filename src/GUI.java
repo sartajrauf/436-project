@@ -55,6 +55,7 @@ public class GUI extends Application {
     private Button previousWeekButton = new Button("<");
     private Button nextWeekButton = new Button(">");
     private Button addNewTaskButton = new Button("Add New Task");
+    private Button rescheduleButton = new Button("Reschedule Task");
 
     @Override
     public void start(Stage primaryStage) {
@@ -140,6 +141,7 @@ public class GUI extends Application {
         // add the action pane and all element inside it; the action pane will always bu
         // 200px tall
         actionGrid.add(addNewTaskButton, 0, 0);
+        actionGrid.add(rescheduleButton, 1, 0);
         window.add(actionGrid, 0, 2);
 
         Scene scene = new Scene(window, 1000, 900);
@@ -187,6 +189,14 @@ public class GUI extends Application {
             @Override
             public void handle(MouseEvent event) {
                 addNewTask(schedule);
+                updateTable(schedule);
+            }
+        });
+        // Add logic for rescheduling tasks
+        rescheduleButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                schedule.reschedule();
                 updateTable(schedule);
             }
         });
