@@ -7,6 +7,7 @@
  */
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDateTime;
 
@@ -38,7 +39,7 @@ public class ScheduleTest {
         assertEquals(0, schedule.getTimeBlocks().size(), "No tasks exists so no TimeBlocks should exist either.");
         schedule.addTask(task1);
         schedule.addTask(task2);
-        
+
         schedule.removeTask(task1);
         assertEquals(1, schedule.getTimeBlocks().size(), "Schedule should have one time block after removing Task 1.");
         assertEquals(task2, schedule.getTimeBlocks().get(0).getTask(), "Remaining task should be Task 2.");
@@ -90,7 +91,8 @@ public class ScheduleTest {
 
         schedule.setStartTime(scheduleStart.plusHours(6));
         schedule.setEndTime(scheduleEnd.plusHours(6));
-        assertEquals(true, schedule.isValid(), "Schedule should be valid because changing the start time reschedules as needed.");
+        assertEquals(true, schedule.isValid(),
+                "Schedule should be valid because changing the start time reschedules as needed.");
     }
 
     // This is a harder test and involves an algorithm being applied to make a valid
@@ -131,16 +133,66 @@ public class ScheduleTest {
         assertEquals(earliestTime, schedule.getStartTime(), "Start time should come from schedule.");
         assertEquals(latestTime, schedule.getEndTime(), "End time should come from otherSchedule.");
     }
-    
+
+    @Test
+    public void testIsBound() {
+        Schedule schedule = new Schedule(LocalDateTime.of(2024, 10, 1, 0, 0), LocalDateTime.of(2024, 10, 2, 0, 0));
+        LocalDateTime earliestTime = LocalDateTime.of(2024, 10, 1, 0, 0);
+        LocalDateTime latestTime = LocalDateTime.of(2024, 10, 2, 0, 0);
+        // inside (should work)
+        TimeBlock t1 = new TimeBlock(task1, LocalDateTime.of(2024, 10, 1, 9, 0), LocalDateTime.of(2024, 10, 1, 10, 0));
+        // flush against (should work)
+        TimeBlock t2 = new TimeBlock(task2, earliestTime, latestTime);
+        // slightly before (should not work and instead return error)
+        TimeBlock t3 = new TimeBlock(task3, earliestTime.minusMinutes(1), LocalDateTime.of(2024, 10, 1, 9, 0));
+        // slightly after (should not work and instead return error)
+        TimeBlock t4 = new TimeBlock(task4, LocalDateTime.of(2024, 10, 1, 9, 0), latestTime.plusMinutes(1));
+        assertEquals(true, schedule.isBound(t1), "Should be well within the bounds");
+        assertEquals(true, schedule.isBound(t2), "Should be flush up against the bounds");
+        assertEquals(false, schedule.isBound(t3), "Should be invalid, startTime is slightly out of bounds");
+        assertEquals(false, schedule.isBound(t4), "Should be invalid, endTime is slightly out of bounds");
+    }
+
+    @Test
+    public void testAddTimeBlockManually() {
+        Schedule schedule = new Schedule(LocalDateTime.of(2024, 10, 1, 0, 0), LocalDateTime.of(2024, 10, 2, 0, 0));
+        LocalDateTime earliestTime = LocalDateTime.of(2024, 10, 1, 0, 0);
+        LocalDateTime latestTime = LocalDateTime.of(2024, 10, 2, 0, 0);
+        // inside (should work)
+        TimeBlock t1 = new TimeBlock(task1, LocalDateTime.of(2024, 10, 1, 9, 0), LocalDateTime.of(2024, 10, 1, 10, 0));
+        // flush against (should work)
+        TimeBlock t2 = new TimeBlock(task2, earliestTime, latestTime);
+        // slightly before (should not work and instead return error)
+        TimeBlock t3 = new TimeBlock(task3, earliestTime.minusMinutes(1), LocalDateTime.of(2024, 10, 1, 9, 0));
+        // slightly after (should not work and instead return error)
+        TimeBlock t4 = new TimeBlock(task4, LocalDateTime.of(2024, 10, 1, 9, 0), latestTime.plusMinutes(1));
+        schedule.addTimeBlockManually(t1);
+        schedule.addTimeBlockManually(t2);
+        // The reason we expect an error over a boolean is because our Schedule object
+        // should
+        // not be in a position where a timeblock is out of bounds. We should always
+        // assume
+        // our timeblocks are inside the bounds. We cannot be in a state where it is out
+        // of bounds.
+        // should return an error (something should have gone wrong)
+        assertThrows(Exception.class, () -> {
+            schedule.addTimeBlockManually(t3);
+        });
+        // should return an error (something should have gone wrong)
+        assertThrows(Exception.class, () -> {
+            schedule.addTimeBlockManually(t4);
+        });
+    }
+
     // Basic test to for the String representation of a schedule
     @Test
     public void testToString() {
-    	
-    	schedule.addTask(task1);
+
+        schedule.addTask(task1);
         schedule.addTask(task2);
         schedule.addTask(task3);
         schedule.addTask(task4);
-        
+
         System.out.println(schedule.toString());
     }
 
