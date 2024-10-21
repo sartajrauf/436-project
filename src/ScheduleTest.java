@@ -184,6 +184,18 @@ public class ScheduleTest {
         });
     }
 
+    // Look at the implementation of the function for more detail.
+    // This test case should test the function. However I'm not sure
+    // what exact requirements would be needed.
+    // I simply want this function because I want a way to force all
+    // tasks to reschedule for adding a feature. Currently it should
+    // randomize the task ordering and create a new list of blocklists
+    @Test
+    public void testReschedule() {
+        schedule.reschedule();
+        throw new RuntimeException("Not implemented");
+    }
+
     // Basic test to for the String representation of a schedule
     @Test
     public void testToString() {

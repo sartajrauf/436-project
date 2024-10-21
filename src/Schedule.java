@@ -15,6 +15,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import java.util.Optional;
 
+import java.util.Collections;
+
+
 /*
 * Schedule contains the TimeBlock and Task as well as a start time and end time
 * of this 
@@ -135,6 +138,28 @@ public class Schedule {
         }
     }
 
+    // Reschedule all timeblocks. This is a dumb implementation.
+    // We want to visibly see a new schedule being made with the
+    // existing tasks. We will shuffle/randomize the positions
+    // for more clear feature demonstrations. In the future
+    // we should look into rescheduling in a more useful way.
+    // (So like keeping and using old information to improve
+    // rather than throwing it away).
+    // TODO make test case (can't really think of a good one at the moment sry)
+    public void reschedule() {
+        // collect all of our tasks (throw away all other information)
+        List<Task> tasks = getTasks();
+        timeBlocks.clear();
+
+        // shuffle them somehow.
+        Collections.shuffle(tasks);
+
+        // start adding them all back
+        for (Task task : tasks) {
+            addTask(task);
+        }
+    }
+
     // Check if our current schedule is valid. Valid is determined by whether it
     // lies inside our schedule and no timeblock overlaps another timeblock.
     // NOTE: this is likely going to become DEPRECATED because we really
@@ -223,5 +248,14 @@ public class Schedule {
                     timeblock.getStartTime() + " - " + timeblock.getEndTime() + "\n";
         }
         return retval.substring(0, retval.length() - 1);
+    }
+
+    // helper method which might become public when needed.
+    private List<Task> getTasks() {
+        ArrayList<Task> tasks = new ArrayList<>();
+        for (TimeBlock timeBlock : timeBlocks) {
+            tasks.add(timeBlock.getTask());
+        }
+        return tasks;
     }
 }
