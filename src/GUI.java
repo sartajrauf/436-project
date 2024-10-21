@@ -13,7 +13,6 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 public class GUI extends Application {
@@ -35,10 +34,12 @@ public class GUI extends Application {
     GridPane titleGrid = new GridPane();
     ScrollPane scheduleScroller = new ScrollPane();
     GridPane scheduleGrid = new GridPane();
+    GridPane actionGrid = new GridPane();
 
     // interactive elements
     private Button previousWeekButton = new Button("<");
     private Button nextWeekButton = new Button(">");
+    private Button addNewTaskButton = new Button("Add New Task");
 
     @Override
     public void start(Stage primaryStage) {
@@ -49,7 +50,6 @@ public class GUI extends Application {
         titleGrid.setHgap(20);
         titleGrid.add(previousWeekButton, 0, 0);
         title.setFont(new Font(30));
-        title.setTextAlignment(TextAlignment.CENTER);
         titleGrid.add(title, 1, 0);
         titleGrid.add(nextWeekButton, 2, 0);
         window.add(titleGrid, 0, 0 );
@@ -95,7 +95,8 @@ public class GUI extends Application {
         window.add(scheduleScroller, 0, 1);    
         
         // add the action pane and all element inside it; the action pane will always bu 200px tall
-        window.add(new Label("Options"), 0, 2);
+        actionGrid.add(addNewTaskButton, 0, 0);
+        window.add(actionGrid, 0, 2);
 
         Scene scene = new Scene(window, 1000, 900);
         primaryStage.setScene(scene);
@@ -116,6 +117,23 @@ public class GUI extends Application {
         primaryStage.maximizedProperty().addListener((obs, oldVal, newVal) -> {
             // this isn't working for some reason, will figure it out later
             setElementSizes();
+        });
+
+        previousWeekButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                calendar.backOneWeek();
+                currentWeek = calendar.getCurrentWeek();
+                title.setText(currentWeek.getTimeframeString());
+            }
+        });
+        nextWeekButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                calendar.forwardOneWeek();
+                currentWeek = calendar.getCurrentWeek();
+                title.setText(currentWeek.getTimeframeString());
+            }
         });
     }
 
@@ -142,7 +160,9 @@ public class GUI extends Application {
         ColumnConstraints rightAlignButton = new ColumnConstraints((window.getWidth() - 335) / 2);
         rightAlignButton.setHalignment(HPos.RIGHT);
         titleGrid.getColumnConstraints().add(rightAlignButton);
-        titleGrid.getColumnConstraints().add(new ColumnConstraints(335));
+        ColumnConstraints centerAlignLabel = new ColumnConstraints(335);
+        centerAlignLabel.setHalignment(HPos.CENTER);
+        titleGrid.getColumnConstraints().add(centerAlignLabel);
         ColumnConstraints leftAlignButton = new ColumnConstraints((window.getWidth() - 335) / 2);
         leftAlignButton.setHalignment(HPos.LEFT);
         titleGrid.getColumnConstraints().add(leftAlignButton);

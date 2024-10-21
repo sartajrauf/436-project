@@ -27,6 +27,10 @@ public class Calendar {
 		if (calendarWeeks.indexOf(currentWeek) < calendarWeeks.size() - 1) {
 			currentWeek = calendarWeeks.get(calendarWeeks.indexOf(currentWeek) + 1);
 		}
+		else {
+			addNextWeek();
+			currentWeek = calendarWeeks.get(calendarWeeks.size() - 1);
+		}
 	}
 
 	public void backOneWeek() {
