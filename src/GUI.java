@@ -20,6 +20,7 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.time.Duration;
 
@@ -32,6 +33,7 @@ public class GUI extends Application {
 
     // very temporary. Will have 24*7 = 168 slots
     private List<Label> slots = new ArrayList<>(168);
+    private HashMap<Label, TimeBlock> slotsMap = new HashMap<>();
 
     // backing structures
     Calendar calendar = new Calendar(LocalDateTime.of(2024, 10, 20, 0, 0, 0));
@@ -86,8 +88,6 @@ public class GUI extends Application {
         }
 
         for (int day = 0; day < DAYS_IN_WEEK; day++) {
-            // Label hourLabel = new Label(String.format("%02d:00", hour));
-            // scheduleGrid.add(hourLabel, 0, hour + 1); // Add the hour label at column `0`, row `hour+1`
 
             for (int hour = 0; hour < HOURS_IN_DAY; hour++) {
                 Label slot = new Label();
@@ -99,11 +99,21 @@ public class GUI extends Application {
                     public void handle(MouseEvent event) {
                         if (!slot.getText().equals("")) {
                             System.out.println("I have been clicked: " + slot.getText());
+                            TaskEditDialog dialog = new TaskEditDialog();
+                            if (!slotsMap.containsKey(slot)){
+                                throw new RuntimeException("Attempted to use label with associated timeblock");
+                            }
+                            Optional<Boolean> reschedule = dialog.showEditDialog(schedule, slotsMap.get(slot));
+                            updateTable(schedule);
+                            if (reschedule.isPresent() && reschedule.get()){
+                                // reschedule or something
+                            }
                         } else {
                             System.out.println("I have been clicked: <empty>");
                         }
                     }
                 });
+                // slot.setId("slot" + ((day+1)*(hour+1)-1)); // can be used to uniquely identify
                 slots.add(slot);
                 scheduleGrid.add(slot, day + 1, hour + 1); // Add empty slots for each hour and day
             }
@@ -222,8 +232,10 @@ public class GUI extends Application {
 
     private void updateTable(Schedule schedule) {
         // clear all previous slots
+        // clear all hashmap label lookups
         for (Label label : slots) {
             label.setText("");
+            slotsMap.clear();
         }
 
         for (TimeBlock timeblock : schedule.getTimeBlocks()) {
@@ -237,7 +249,9 @@ public class GUI extends Application {
                             + index + ") " + timeblock);
                     break;
                 }
-                slots.get(index).setText(slots.get(index).getText() + timeblock.getTask().getDescription());
+                Label label = slots.get(index);
+                slotsMap.put(label, timeblock);
+                label.setText(timeblock.getTask().getDescription());
             }
         }
 
