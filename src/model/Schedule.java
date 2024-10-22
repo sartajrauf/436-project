@@ -10,14 +10,8 @@ package model;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import java.util.Optional;
-
 import java.util.Collections;
-
+import java.util.List;
 
 /*
 * Schedule contains the TimeBlock and Task as well as a start time and end time
