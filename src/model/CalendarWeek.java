@@ -14,7 +14,7 @@ public class CalendarWeek {
 		
 		this.weekSchedule = new Schedule(startTime, startTime.plusDays(7));
 		this.startTime = startTime;
-		this.endTime = startTime.plusDays(7);
+		this.endTime = startTime.plusDays(6);
 		this.timeframeString = startTime.getMonthValue() + "/" + startTime.getDayOfMonth() + "/" + startTime.getYear() + 
 							   " - " + endTime.getMonthValue() + "/" + endTime.getDayOfMonth() + "/" + endTime.getYear();
 	}
