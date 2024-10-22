@@ -65,6 +65,12 @@ public class GUI extends Application {
     @Override
     public void start(Stage primaryStage) {
 
+<<<<<<< HEAD
+=======
+        Schedule schedule = new Schedule(LocalDateTime.of(2024, 10, 20, 9, 0, 0),
+                LocalDateTime.of(2024, 10, 20, 23, 0, 0));
+
+>>>>>>> parent of aa4a9f3 (hardcode a week into the schedule)
         // add the title; the title will always be 100px tall
         titleGrid.setHgap(20);
         titleGrid.add(previousWeekButton, 0, 0);
@@ -138,7 +144,7 @@ public class GUI extends Application {
         actionGrid.add(rescheduleButton, 1, 0);
         window.add(actionGrid, 0, 2);
 
-        Scene scene = new Scene(window, 800, 600);
+        Scene scene = new Scene(window, 1000, 900);
         primaryStage.setScene(scene);
         primaryStage.show();
 
