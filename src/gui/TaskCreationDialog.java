@@ -7,6 +7,7 @@ import model.Task;
 import java.util.Optional;
 
 public class TaskCreationDialog {
+    //public int priority;
 
     public Optional<Task> showTaskCreationDialog() {
         // Step 1: Create dialog to get task name
@@ -49,6 +50,11 @@ public class TaskCreationDialog {
             showAlert("Invalid Input", "Please enter a valid number for the estimated time.");
             return Optional.empty();
         }
+
+      //  TextInputDialog prio =  new TextInputDialog();
+       // prio.setTitle("Add New Task");
+       // prio.setHeaderText("Enter the priority of the task");
+       // prio.setContentText("Importance:");
 
         // Step 3: Create the task and return it
         Task newTask = new Task(taskName, estimatedTime);
