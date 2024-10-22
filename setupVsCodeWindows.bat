@@ -8,7 +8,7 @@ if not "%java_version%"=="21" (
     echo WARNING Java 21 is required, but version %java_version% was detected.
     echo Please make sure you configure vscode to use Java 21. This can be
     echo done by editing the classpath using
-    echo View > Command Palette... > Java: Configure Classpath > JDK Runtime > JavaSE-21
+    echo "View > Command Palette... > Java: Configure Classpath > JDK Runtime > JavaSE-21"
 )
 
 REM Create necessary directories
