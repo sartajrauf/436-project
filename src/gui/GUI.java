@@ -46,7 +46,7 @@ public class GUI extends Application {
     private Button previousWeekButton = new Button("<");
     private Button nextWeekButton = new Button(">");
     private Button addNewTaskButton = new Button("Add New Task");
-    private Button rescheduleButton = new Button("Reschedule Task");
+    private Button rescheduleButton = new Button("Reschedule All");
     private Button loadExampleButton = new Button("Load Example");
 
 
