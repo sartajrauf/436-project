@@ -62,6 +62,7 @@ public class GUI extends Application {
     private Button nextWeekButton = new Button(">");
     private Button addNewTaskButton = new Button("Add New Task");
     private Button rescheduleButton = new Button("Reschedule Task");
+    private Button loadExampleButton = new Button("Load Example");
 
     @Override
     public void start(Stage primaryStage) {
@@ -79,6 +80,8 @@ public class GUI extends Application {
         // 200px tall
         actionGrid.add(addNewTaskButton, 0, 0);
         actionGrid.add(rescheduleButton, 1, 0);
+        actionGrid.add(loadExampleButton, 2, 0);
+        
         window.add(actionGrid, 0, 2);
 
         Scene scene = new Scene(window, 800, 700);
@@ -110,6 +113,7 @@ public class GUI extends Application {
                 currentWeek = calendar.getCurrentWeek();
                 title.setText(currentWeek.getTimeframeString());
                 updateTable(currentWeek.getSchedule());
+                event.consume();
             }
         });
         nextWeekButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -120,6 +124,7 @@ public class GUI extends Application {
                 currentWeek = calendar.getCurrentWeek();
                 title.setText(currentWeek.getTimeframeString());
                 updateTable(currentWeek.getSchedule());
+                event.consume();
             }
         });
         addNewTaskButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -127,6 +132,7 @@ public class GUI extends Application {
             public void handle(MouseEvent event) {
                 addNewTask(currentWeek.getSchedule());
                 // updateTable(currentWeek.getSchedule());
+                event.consume();
             }
         });
         // Add logic for rescheduling tasks
@@ -134,7 +140,19 @@ public class GUI extends Application {
             @Override
             public void handle(MouseEvent event) {
                 currentWeek.getSchedule().reschedule();
+                // updateTable(currentWeek.getSchedule());
+                event.consume();
+            }
+        });
+        loadExampleButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                // remove all other elements for demonstration purposes.
+                currentWeek.getSchedule().removeAll();
+                ExampleSchedules.manuallyAddTimeBlocks(currentWeek.getSchedule());
+                // taskPane.refresh(this, currentWeek.getSchedule());
                 updateTable(currentWeek.getSchedule());
+                event.consume();
             }
         });
         
@@ -150,12 +168,19 @@ public class GUI extends Application {
                 // figure out what hour row it is.
                 int hourRow = (int)(y/TaskPane.HOUR_HEIGHT);
 
+                // if it's out of bounds then ignore it
+                if (dayCol < 0 || dayCol > 6 || hourRow < 0 || hourRow > 23){
+                    eMouseEvent.consume();
+                    return;
+                }
+
                 // begin task placement at that location down to the hour.
                 LocalDateTime newTime = currentWeek.getStartTime().plus(Duration.ofDays(dayCol).plus(Duration.ofHours(hourRow)));
                 TimeBlock timeBlock = addNewTaskAt(currentWeek.getSchedule(), newTime);
                 if (timeBlock != null){
                     taskPane.addTimeBlock(timeBlock, new HandleEditEvent(timeBlock));
                 }
+                eMouseEvent.consume();
             }
         });
     }
@@ -254,7 +279,7 @@ public class GUI extends Application {
         taskPane.addTimeBlock(timeBlock, new HandleEditEvent(timeBlock));
     }
 
-    class HandleEditEvent implements EventHandler<MouseEvent> {
+    public class HandleEditEvent implements EventHandler<MouseEvent> {
 
         TimeBlock timeBlock;
 
@@ -270,6 +295,7 @@ public class GUI extends Application {
             if (currentWeek.getSchedule().containsTimeBlock(timeBlock)) {
                 taskPane.addTimeBlock(timeBlock, this);
             }
+            event.consume();
         }
     }
 
