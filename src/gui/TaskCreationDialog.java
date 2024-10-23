@@ -1,13 +1,13 @@
 package gui;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TextInputDialog;
-import model.Task;
 
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import model.Task;
+import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Optional;
 
 public class TaskCreationDialog {
-    //public int priority;
 
     public Optional<Task> showTaskCreationDialog() {
         // Step 1: Create dialog to get task name
@@ -51,14 +51,51 @@ public class TaskCreationDialog {
             return Optional.empty();
         }
 
-      //  TextInputDialog prio =  new TextInputDialog();
-       // prio.setTitle("Add New Task");
-       // prio.setHeaderText("Enter the priority of the task");
-       // prio.setContentText("Importance:");
+        // Step 3: Create dialog to get deadline date and time
+        DatePicker deadlinePicker = new DatePicker();
+        deadlinePicker.setPromptText("Select Deadline Date");
 
-        // Step 3: Create the task and return it
-        Task newTask = new Task(taskName, estimatedTime);
-        return Optional.of(newTask);
+        ComboBox<Integer> hourPicker = new ComboBox<>();
+        for (int i = 0; i < 24; i++) {
+            hourPicker.getItems().add(i); // Adding hours from 0 to 23
+        }
+        hourPicker.setPromptText("Select Hour");
+
+        Dialog<ButtonType> deadlineDialog = new Dialog<>();
+        deadlineDialog.setTitle("Add New Task");
+        deadlineDialog.setHeaderText("Select Deadline Date and Time");
+
+        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        deadlineDialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.add(new Label("Deadline Date:"), 0, 0);
+        grid.add(deadlinePicker, 1, 0);
+        grid.add(new Label("Deadline Hour:"), 0, 1);
+        grid.add(hourPicker, 1, 1);
+        deadlineDialog.getDialogPane().setContent(grid);
+
+        Optional<ButtonType> result = deadlineDialog.showAndWait();
+        if (result.isPresent() && result.get() == okButtonType) {
+            LocalDate deadlineDate = deadlinePicker.getValue();
+            Integer deadlineHour = hourPicker.getValue();
+
+            if (deadlineHour == null) {
+                deadlineHour = 0;
+            }
+
+            LocalDateTime deadline = null;
+            if (deadlineDate != null) {
+                // Combine date and hour into a LocalDateTime
+                deadline = deadlineDate.atStartOfDay().plusHours(deadlineHour);
+            }
+
+            // Step 4: Create the task and return it
+            Task newTask = new Task(taskName, estimatedTime, deadline);
+            return Optional.of(newTask);
+        } else {
+            return Optional.empty(); // User cancelled or closed the dialog
+        }
     }
 
     private void showAlert(String title, String content) {

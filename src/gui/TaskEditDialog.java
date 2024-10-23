@@ -61,6 +61,12 @@ public class TaskEditDialog {
         Label endTimeLabel = new Label("End Time (HH:mm):");
         TextField endTimeField = new TextField(timeBlock.getEndTime().toLocalTime().toString());
 
+        Label deadlineDateLabel = new Label("Deadline Date:");
+        DatePicker deadlineDatePicker = new DatePicker(timeBlock.getTask().getDeadline().toLocalDate());
+
+        Label deadlineTimeLabel = new Label("Deadline Time (HH:mm):");
+        TextField deadlineTimeField = new TextField(timeBlock.getTask().getDeadline().toLocalTime().toString());
+
         // Add everything to the grid
         grid.add(descriptionLabel, 0, 0);
         grid.add(descriptionField, 1, 0);
@@ -76,6 +82,10 @@ public class TaskEditDialog {
         grid.add(endDatePicker, 1, 5);
         grid.add(endTimeLabel, 0, 6);
         grid.add(endTimeField, 1, 6);
+        grid.add(deadlineDateLabel, 0, 7);
+        grid.add(deadlineDatePicker, 1, 7);
+        grid.add(deadlineTimeLabel, 0, 8);
+        grid.add(deadlineTimeField, 1, 8);
 
         dialog.getDialogPane().setContent(grid);
 
