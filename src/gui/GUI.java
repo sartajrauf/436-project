@@ -12,6 +12,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -66,7 +67,11 @@ public class GUI extends Application {
         
         window.add(actionGrid, 0, 2);
 
-        Scene scene = new Scene(window, 800, 700);
+        // TEMPORARY delete these later
+        primaryStage.setResizable(false);
+        taskPane.setFitToHeight(true);
+
+        Scene scene = new Scene(window, 735, 655);
         primaryStage.setScene(scene);
         primaryStage.show();
 
