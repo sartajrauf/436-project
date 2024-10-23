@@ -92,4 +92,32 @@ public class TimeBlockTest {
         TimeBlock durationTimeBlock = new TimeBlock(task, startTime, duration);
         assertEquals(endTime, durationTimeBlock.getEndTime(), "The end time should be calculated correctly from start time and duration.");
     }
+
+    @Test void testIntersectsWith() {
+        Duration duration = Duration.ofHours(2);
+        // test intersect right
+        TimeBlock blockT = new TimeBlock(task, startTime, duration);
+        TimeBlock blockO = new TimeBlock(task, startTime.plusHours(1), duration);
+        assertEquals(blockT.intersectsWith(blockO), true);
+        // test intersect left
+        blockT = new TimeBlock(task, startTime, duration);
+        blockO = new TimeBlock(task, startTime.plusHours(-1), duration);
+        assertEquals(blockT.intersectsWith(blockO), true);
+        // test intersect inside
+        blockT = new TimeBlock(task, startTime.plusHours(1), duration.plusMinutes(-30));
+        blockO = new TimeBlock(task, startTime, duration);
+        assertEquals(blockT.intersectsWith(blockO), true);
+        // test intersect outside
+        blockT = new TimeBlock(task, startTime, duration);
+        blockO = new TimeBlock(task, startTime.plusHours(-1), duration.plusHours(2));
+        assertEquals(blockT.intersectsWith(blockO), true);
+        // test no intersect right (flush)
+        blockT = new TimeBlock(task, startTime, duration);
+        blockO = new TimeBlock(task, startTime.plusHours(-2), duration);
+        assertEquals(blockT.intersectsWith(blockO), false);
+        // test no intersect left (flush)
+        blockT = new TimeBlock(task, startTime, duration);
+        blockO = new TimeBlock(task, startTime.plusHours(2), duration);
+        assertEquals(blockT.intersectsWith(blockO), false);
+    }
 }

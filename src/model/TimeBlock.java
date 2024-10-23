@@ -61,6 +61,14 @@ public class TimeBlock {
         this.endTime = endTime;
     }
 
+    public boolean intersectsWith(TimeBlock otherBlock) {
+        if ((this.endTime.isAfter(otherBlock.startTime) && this.startTime.isBefore(otherBlock.endTime)) ||
+            (this.startTime.isBefore(otherBlock.endTime) && this.startTime.isAfter(otherBlock.startTime))){
+                return true;
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return "TimeBlock{" +
