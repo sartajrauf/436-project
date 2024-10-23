@@ -262,6 +262,8 @@ public class GUI extends Application {
         @Override
         public void handle(MouseEvent event) {
             System.out.println("I have been clicked: " + timeBlock);
+            TaskEditDialog dialog = new TaskEditDialog();
+            dialog.showEditDialog(currentWeek.getSchedule(), timeBlock);
             taskPane.removeTimeBlock(timeBlock);
             if (currentWeek.getSchedule().containsTimeBlock(timeBlock)) {
                 taskPane.addTimeBlock(timeBlock, this);
