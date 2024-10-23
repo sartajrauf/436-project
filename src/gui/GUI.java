@@ -62,7 +62,7 @@ public class GUI extends Application {
         window.add(titleGrid, 0, 0);
         window.add(taskPane, 0, 1);
 
-        algorithmComboBox.getItems().addAll(Schedule.Algorithm.RANDOM, Schedule.Algorithm.INSERT_NEXT); // Add your algorithms
+        algorithmComboBox.getItems().addAll(Schedule.Algorithm.RANDOM, Schedule.Algorithm.PRIORITY); // Add your algorithms
         algorithmComboBox.getSelectionModel().selectFirst(); // Select the first algorithm by default
 
         // add the action pane and all element inside it; the action pane will always bu

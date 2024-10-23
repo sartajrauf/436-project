@@ -51,7 +51,7 @@ public class TaskCreationDialog {
             return Optional.empty();
         }
 
-        //Step 4: Set the priority of the tast
+        //Step 3: Set the priority of the tast
         //TODO: Create tests for this
         TextInputDialog prio =  new TextInputDialog();
         prio.setTitle("Task Priority");
@@ -80,7 +80,11 @@ public class TaskCreationDialog {
             }
         }
 
-        // Step 3: Create dialog to get deadline date and time
+        // Step 4: Create the task 
+        Task newTask = new Task(taskName, estimatedTime);
+        newTask.setPriority(p);
+
+        // Step 5: Create dialog to get deadline date and time
         DatePicker deadlinePicker = new DatePicker();
         deadlinePicker.setPromptText("Select Deadline Date");
 
@@ -119,13 +123,13 @@ public class TaskCreationDialog {
                 deadline = deadlineDate.atStartOfDay().plusHours(deadlineHour);
             }
 
-            // Step 4: Create the task and return it
-            Task newTask = new Task(taskName, estimatedTime, deadline);
-            newTask.setPriority(p);
-            return Optional.of(newTask);
+            newTask.setDeadline(deadline);
+            
         } else {
             return Optional.empty(); // User cancelled or closed the dialog
         }
+
+        return Optional.of(newTask);
     }
 
     private void showAlert(String title, String content) {

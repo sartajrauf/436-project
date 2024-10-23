@@ -1,10 +1,6 @@
 package model;
 import java.time.LocalDateTime;
 
-import javafx.util.converter.LocalDateStringConverter;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 /**
  * This is the Task class. It probably will not get that eventful here.

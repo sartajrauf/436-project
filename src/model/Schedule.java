@@ -32,7 +32,7 @@ public class Schedule {
     private LocalDateTime endTime;
 
     public enum Algorithm {
-        INSERT_NEXT,
+        PRIORITY,
         RANDOM
     }
     Algorithm selectedAlgorithm = Algorithm.RANDOM;
@@ -116,6 +116,7 @@ public class Schedule {
     // much of a point except for load balancing the schedule.
     public void removeTask(Task task) {
         timeBlocks.removeIf(block -> block.getTask().equals(task));
+        tasks.remove(task);
     }
 
     // Merge with a different schedule. The merged schedule will be our
@@ -153,12 +154,17 @@ public class Schedule {
         List<Task> tasks = getTasks();
         timeBlocks.clear();
 
+        if(selectedAlgorithm== Algorithm.PRIORITY){
+            addTaskPriorityAlgorithm(tasks);
+        }
+        else{
         // shuffle them somehow.
-        Collections.shuffle(tasks);
+            Collections.shuffle(tasks);
 
-        // start adding them all back
-        for (Task task : tasks) {
-            addTask(task);
+            // start adding them all back
+            for (Task task : tasks) {
+                addTask(task);
+            }
         }
     }
 
@@ -192,13 +198,67 @@ public class Schedule {
     // TimeBlock necessary to insert itself into the schedule.
     public TimeBlock addTask(Task task) {
         switch (selectedAlgorithm) {
-            case Algorithm.RANDOM:
-                return addTaskRandomAlgorithm(task);
-            case Algorithm.INSERT_NEXT:
-                return addTaskAppendAlgorith(task);
             default:
                 return addTaskRandomAlgorithm(task);
         }
+    }
+
+    //TODO: tests!!!
+    private void addTaskPriorityAlgorithm(List<Task> tasks){
+        int len = tasks.size();
+        
+        //sorting by priority using insertion sort
+        for (int i = 1; i < len; i++) {
+            Task t = tasks.get(i); // Current element to be inserted
+            int j = i - 1;    // Index of the last sorted element
+
+            // Move elements of tasks[0..i-1], that are greater than t,
+            // to one position ahead of their current position
+            while (j >= 0 && tasks.get(j).getPriority() > t.getPriority()) {
+                tasks.set(j + 1, tasks.get(j));
+                j = j - 1;
+            }
+            // Insert the current element at its correct position
+            tasks.set(j + 1, t);
+        }
+
+        //sorts the tasks list further in terms of deadline
+        for (int i = 1; i < len; i++) {
+            Task t2 = tasks.get(i); // Current task to be inserted
+            int j = i - 1;       // Index of the last sorted task
+
+            // Move tasks that have the same priority and a later deadline
+            while (j >= 0 && tasks.get(j).getPriority() == t2.getPriority() && tasks.get(j).getDeadline().isAfter(t2.getDeadline())) {
+                tasks.set(j + 1, tasks.get(j)); // Shift task to the right
+                j--; // Move to the previous task
+            }
+            // Insert the current task at its correct position
+            tasks.set(j + 1, t2);
+        }
+
+        RandomGenerator random = RandomGenerator.of("Random");
+
+        for (int i = 0; i < len; i++) {
+            for (int j = 0; j < 10000; j++) {
+                LocalDateTime currentDateTime = LocalDateTime.now();
+                LocalDateTime randomStartTime = startTime.plusMinutes(random.nextInt(7*24*30)*2);
+                LocalDateTime newEndTime = randomStartTime.plusMinutes((long)(tasks.get(i).getEstimatedTime() * 60));
+                TimeBlock timeBlock = new TimeBlock(tasks.get(i), randomStartTime, newEndTime);
+                // check if this is a valid position
+                if (canInsertTimeBlock(timeBlock))  {
+                    if(!checkIfIntersectingNight(timeBlock) ){
+                        if ( randomStartTime.isAfter(currentDateTime)) {
+                            if (endTime.isBefore(tasks.get(i).getDeadline())){
+                                // add the new task
+                                timeBlocks.add(timeBlock);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println(timeBlocks);
     }
 
     private TimeBlock addTaskAppendAlgorith(Task task){
