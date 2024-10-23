@@ -45,7 +45,7 @@ public class GUI extends Application {
     private HashMap<Label, Integer> slotsMapIndex = new HashMap<>();
 
     // backing structures
-    Calendar calendar = new Calendar(LocalDateTime.of(2024, 10, 20, 0, 0, 0));
+    Calendar calendar = new Calendar(LocalDateTime.of(2024, 10, 21, 0, 0, 0));
     CalendarWeek currentWeek = calendar.getCurrentWeek();
 
     // decorative elements
@@ -54,9 +54,8 @@ public class GUI extends Application {
     // organization elements
     GridPane window = new GridPane();
     GridPane titleGrid = new GridPane();
-    ScrollPane scheduleScroller = new ScrollPane();
-    GridPane scheduleGrid = new GridPane();
     GridPane actionGrid = new GridPane();
+    TaskPane taskPane = new TaskPane();
 
     // interactive elements
     private Button previousWeekButton = new Button("<");
@@ -74,73 +73,7 @@ public class GUI extends Application {
         titleGrid.add(title, 1, 0);
         titleGrid.add(nextWeekButton, 2, 0);
         window.add(titleGrid, 0, 0);
-
-        // add the schedule pane; the schedule pane will always take up as much space as
-        // possible
-        // scheduleGrid.setHgap(5);
-        // scheduleGrid.setVgap(5);
-        scheduleGrid.setPadding(new Insets(5, 0, 5, 0));
-
-        // Add day labels to the top row
-        for (int day = 0; day < DAYS_IN_WEEK; day++) {
-            Label dayLabel = new Label(DAYS[day]);
-            scheduleGrid.add(dayLabel, day + 1, 0); // Add the label at column `day+1`, row `0`
-        }
-
-        // Add hour labels to the first column and display tasks in the corresponding
-        // slots
-        for (int hour = 0; hour < HOURS_IN_DAY; hour++) {
-            Label hourLabel = new Label(String.format("%02d:00", hour));
-            scheduleGrid.add(hourLabel, 0, hour + 1); // Add the hour label at column `0`, row `hour+1`
-        }
-
-        for (int day = 0; day < DAYS_IN_WEEK; day++) {
-
-            for (int hour = 0; hour < HOURS_IN_DAY; hour++) {
-                Label slot = new Label();
-                slot.setPrefWidth(Double.MAX_VALUE);
-                slot.setStyle("-fx-border-color: black; -fx-min-width: 60px; -fx-min-height: 30px;");
-                slot.setAlignment(Pos.CENTER);
-                slot.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                    @Override
-                    public void handle(MouseEvent event) {
-                        if (!slot.getText().equals("")) {
-                            System.out.println("I have been clicked: " + slot.getText());
-                            // Ok, so we want to modify a task that exists.
-                            TaskEditDialog dialog = new TaskEditDialog();
-                            if (!slotsMap.containsKey(slot)) {
-                                throw new RuntimeException("Attempted to use label with associated timeblock");
-                            }
-                            Optional<Boolean> reschedule = dialog.showEditDialog(currentWeek.getSchedule(),
-                                    slotsMap.get(slot));
-                            updateTable(currentWeek.getSchedule());
-                            if (reschedule.isPresent() && reschedule.get()) {
-                                // reschedule or something
-                            }
-                        } else {
-                            System.out.println("I have been clicked: <empty>");
-                            // Ok, so we want to create a new task.
-                            // figure out what time we clicked on.
-                            LocalDateTime time = currentWeek.getStartTime().plus(Duration.ofHours(slotsMapIndex.get(slot).intValue()));
-                            System.out.println(time);
-                            addNewTaskAt(currentWeek.getSchedule(), time);
-                            // make sure to render the new changes
-                            updateTable(currentWeek.getSchedule());
-                        }
-                    }
-                });
-                // map to translate what hour from a date start it is offset by.
-                slotsMapIndex.put(slot, day*24 + hour);
-                slots.add(slot);
-                scheduleGrid.add(slot, day + 1, hour + 1); // Add empty slots for each hour and day
-            }
-        }
-
-        // add the grid pane to a scroll pane so that if the window gets too small, it
-        // gets a scroll bar
-        scheduleScroller.setContent(scheduleGrid);
-        scheduleScroller.setFitToWidth(true);
-        window.add(scheduleScroller, 0, 1);
+        window.add(taskPane, 0, 1);
 
         // add the action pane and all element inside it; the action pane will always bu
         // 200px tall
@@ -193,7 +126,7 @@ public class GUI extends Application {
             @Override
             public void handle(MouseEvent event) {
                 addNewTask(currentWeek.getSchedule());
-                updateTable(currentWeek.getSchedule());
+                // updateTable(currentWeek.getSchedule());
             }
         });
         // Add logic for rescheduling tasks
@@ -236,17 +169,6 @@ public class GUI extends Application {
         ColumnConstraints leftAlignButton = new ColumnConstraints((window.getWidth() - 335) / 2);
         leftAlignButton.setHalignment(HPos.LEFT);
         titleGrid.getColumnConstraints().add(leftAlignButton);
-
-        while (!scheduleGrid.getColumnConstraints().isEmpty()) {
-            scheduleGrid.getColumnConstraints().remove(0);
-        }
-        for (int i = 0; i < 8; i++) {
-            if (i == 0) {
-                scheduleGrid.getColumnConstraints().add(new ColumnConstraints(50));
-            } else {
-                scheduleGrid.getColumnConstraints().add(new ColumnConstraints((window.getWidth() - 110) / 7));
-            }
-        }
     }
 
     // inclusive dateStart, exclusive dateEnd
@@ -256,28 +178,9 @@ public class GUI extends Application {
     }
 
     private void updateTable(Schedule schedule) {
-        // clear all previous slots
-        // clear all hashmap label lookups
-        for (Label label : slots) {
-            label.setText("");
-            slotsMap.clear();
-        }
-
-        for (TimeBlock timeblock : schedule.getTimeBlocks()) {
-            if (!currentWeek.getStartTime().isAfter(timeblock.getStartTime()) &&
-                    currentWeek.getEndTime().isAfter(timeblock.getStartTime())) {
-                Duration duration = Duration.between(currentWeek.getStartTime(), timeblock.getStartTime());
-                int index = (int) duration.toHours();
-                if (index > slots.size() || index < 0) {
-                    System.out.println("Could not update one label since the index of the timeblock is invalid ("
-                            + index + ") " + timeblock);
-                    break;
-                }
-                for (int i = index; i < index + timeblock.getDuration().toHours(); i++) {
-                    slotsMap.put(slots.get(i), timeblock);
-                    slots.get(i).setText(timeblock.getTask().getDescription());
-                }
-            }
+        taskPane.removeAllTimeBlocks();
+        for (TimeBlock timeBlock : currentWeek.getSchedule().getTimeBlocks()) {
+            taskPane.addTimeBlock(timeBlock, new HandleEditEvent(timeBlock));
         }
     }
 
@@ -325,6 +228,27 @@ public class GUI extends Application {
         // Add task to the calendar or any data structure you're using for tasks
         TimeBlock timeBlock = schedule.addTask(newTask);
         System.out.println("New Task Added: " + timeBlock);
+
+        taskPane.addTimeBlock(timeBlock, new HandleEditEvent(timeBlock));
+    }
+
+    class HandleEditEvent implements EventHandler<MouseEvent> {
+
+        TimeBlock timeBlock;
+
+        public HandleEditEvent(TimeBlock timeBlock) {
+            this.timeBlock = timeBlock;
+        }
+        @Override
+        public void handle(MouseEvent event) {
+            System.out.println("I have been clicked: " + timeBlock);
+            TaskEditDialog dialog = new TaskEditDialog();
+            Optional<Boolean> reschedule = dialog.showEditDialog(currentWeek.getSchedule(), timeBlock);
+            taskPane.removeTimeBlock(timeBlock);
+            if (currentWeek.getSchedule().containsTimeBlock(timeBlock)) {
+                taskPane.addTimeBlock(timeBlock, this);
+            }
+        }
     }
 
     public static void main(String[] args) {

@@ -107,7 +107,7 @@ public class TaskEditDialog {
                     timeBlock.setStartTime(newStart);
                     timeBlock.setEndTime(newEnd);
 
-                    boolean reschedule = dialogButton == rescheduleButtonType;
+                    boolean reschedule = dialogButton == rescheduleButtonType || dialogButton == acceptButtonType;
 
                     return reschedule;
                 } catch (DateTimeParseException e) {
@@ -115,7 +115,7 @@ public class TaskEditDialog {
                     System.out.println("Invalid time format. Please use H:mm or HH:mm.");
                 }
 
-                boolean reschedule = dialogButton == rescheduleButtonType;
+                boolean reschedule = dialogButton == rescheduleButtonType || dialogButton == acceptButtonType;
 
                 return reschedule;
             } else if (dialogButton == removeButtonType) {

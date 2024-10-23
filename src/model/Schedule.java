@@ -234,6 +234,10 @@ public class Schedule {
         return true;
     }
 
+    public boolean containsTimeBlock(TimeBlock timeBlock){
+        return timeBlocks.contains(timeBlock);
+    }
+
     @Override
     public String toString() {
 
