@@ -1,4 +1,5 @@
 package gui;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -75,8 +77,8 @@ public class GUI extends Application {
 
         // add the schedule pane; the schedule pane will always take up as much space as
         // possible
-        scheduleGrid.setHgap(5);
-        scheduleGrid.setVgap(5);
+        // scheduleGrid.setHgap(5);
+        // scheduleGrid.setVgap(5);
         scheduleGrid.setPadding(new Insets(5, 0, 5, 0));
 
         // Add day labels to the top row
@@ -109,18 +111,26 @@ public class GUI extends Application {
                             if (!slotsMap.containsKey(slot)) {
                                 throw new RuntimeException("Attempted to use label with associated timeblock");
                             }
-                            Optional<Boolean> reschedule = dialog.showEditDialog(currentWeek.getSchedule(), slotsMap.get(slot));
+                            Optional<Boolean> reschedule = dialog.showEditDialog(currentWeek.getSchedule(),
+                                    slotsMap.get(slot));
                             updateTable(currentWeek.getSchedule());
                             if (reschedule.isPresent() && reschedule.get()) {
                                 // reschedule or something
                             }
-                        } 
+                        } else {
+                            System.out.println("I have been clicked: <empty>");
+                            // Ok, so we want to create a new task.
+                            // figure out what time we clicked on.
+                            LocalDateTime time = currentWeek.getStartTime().plus(Duration.ofHours(slotsMapIndex.get(slot).intValue()));
+                            System.out.println(time);
+                            addNewTaskAt(currentWeek.getSchedule(), time);
+                            // make sure to render the new changes
+                            updateTable(currentWeek.getSchedule());
+                        }
                     }
                 });
-                // slot.setId("slot" + ((day+1)*(hour+1)-1)); // can be used to uniquely
-                // identify
                 // map to translate what hour from a date start it is offset by.
-                slotsMapIndex.put(slot, ((day+1)*(hour+1)-1));
+                slotsMapIndex.put(slot, day*24 + hour);
                 slots.add(slot);
                 scheduleGrid.add(slot, day + 1, hour + 1); // Add empty slots for each hour and day
             }
@@ -138,11 +148,11 @@ public class GUI extends Application {
         actionGrid.add(rescheduleButton, 1, 0);
         window.add(actionGrid, 0, 2);
 
-        Scene scene = new Scene(window, 1000, 900);
+        Scene scene = new Scene(window, 800, 700);
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        primaryStage.setMinWidth(700);
+        primaryStage.setMinWidth(500);
         primaryStage.setMinHeight(500);
 
         // set initial sizes for the screen elements and set up listeners so that the
@@ -200,14 +210,13 @@ public class GUI extends Application {
     // screen; this function will be
     // callled automatically every time the user resizes the screen
     private void setElementSizes() {
-
         while (!window.getRowConstraints().isEmpty()) {
             window.getRowConstraints().remove(0);
         }
         while (!window.getColumnConstraints().isEmpty()) {
             window.getColumnConstraints().remove(0);
         }
-        
+
         window.getRowConstraints().add(new RowConstraints(50));
         window.getRowConstraints().add(new RowConstraints(window.getHeight() - 150));
         window.getRowConstraints().add(new RowConstraints(100));
@@ -255,8 +264,8 @@ public class GUI extends Application {
         }
 
         for (TimeBlock timeblock : schedule.getTimeBlocks()) {
-            if (!currentWeek.getStartTime().isAfter(timeblock.getStartTime()) && 
-                currentWeek.getEndTime().isAfter(timeblock.getStartTime())) {
+            if (!currentWeek.getStartTime().isAfter(timeblock.getStartTime()) &&
+                    currentWeek.getEndTime().isAfter(timeblock.getStartTime())) {
                 Duration duration = Duration.between(currentWeek.getStartTime(), timeblock.getStartTime());
                 int index = (int) duration.toHours();
                 if (index > slots.size() || index < 0) {
@@ -295,7 +304,8 @@ public class GUI extends Application {
             schedule.addTimeBlockManually(timeBlock);
         } else {
             // prompt the user that it was an invalid timeblock position
-            Alert alert = new Alert(Alert.AlertType.WARNING, "The selected timeslot is not a valid position.", ButtonType.OK);
+            Alert alert = new Alert(Alert.AlertType.WARNING, "The selected timeslot is not a valid position.",
+                    ButtonType.OK);
             alert.setTitle("Invalid Timeslot");
             alert.setHeaderText("Invalid Selection");
             alert.showAndWait();
