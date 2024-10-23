@@ -12,8 +12,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.random.RandomGenerator;
-
+import java.util.Random;
 /*
 * Schedule contains the TimeBlock and Task as well as a start time and end time
 * of this 
@@ -199,65 +200,49 @@ public class Schedule {
     // Add a task to the schedule. The task should automatically make the
     // TimeBlock necessary to insert itself into the schedule.
     public TimeBlock addTask(Task task) {
-        TimeBlock addedBlock = null;
-
-        //System.out.println("Adding task: " + task.getDescription() + " using " + selectedAlgorithm);
         switch (selectedAlgorithm) {
             case PRIORITY:
-                addedBlock = addTaskPriorityAlgorithm(List.of(task));
+                addTaskPriorityAlgorithm(new ArrayList<>(List.of(task))); // Use a mutable list
                 break;
             case RANDOM:
-                addedBlock = addTaskRandomAlgorithm(task);
-                break;
+                return addTaskRandomAlgorithm(task);
         }
-        if (addedBlock == null) {
-            System.out.println("Can't add null timeblock for task: " + task.getDescription());
-        } else {
-            System.out.println("New Task Added: " + addedBlock);
-        }
-        return addedBlock;
+        return null;
     }
+    
 
     //TODO: tests!!!
-    private TimeBlock addTaskPriorityAlgorithm(List<Task> tasks){
-        int len = tasks.size();
-        TimeBlock addedBlock = null;
-        
+    private void addTaskPriorityAlgorithm(List<Task> tasks) {
+        // Convert to a mutable list
+        List<Task> mutableTasks = new ArrayList<>(tasks);
+    
         // Sort tasks by priority, then by deadline if priorities are the same
-        tasks.sort((t1, t2) -> {
+        mutableTasks.sort((t1, t2) -> {
             int cmp = Integer.compare(t1.getPriority(), t2.getPriority());
             if (cmp == 0) {
                 return t1.getDeadline().compareTo(t2.getDeadline());
             }
             return cmp;
         });
-
-        RandomGenerator random = RandomGenerator.of("Random");
-
-        for (Task task : tasks) {
+    
+        // Continue with the rest of the priority algorithm...
+        Random random = new Random();
+        for (Task task : mutableTasks) {
             for (int j = 0; j < 10000; j++) {
                 LocalDateTime currentDateTime = LocalDateTime.now();
-                LocalDateTime randomStartTime = startTime.plusMinutes(random.nextInt(7*24*30)*2);
-                LocalDateTime newEndTime = randomStartTime.plusMinutes((long)(task.getEstimatedTime() * 60));
+                LocalDateTime randomStartTime = startTime.plusMinutes(random.nextInt(7 * 24 * 30) * 2);
+                LocalDateTime newEndTime = randomStartTime.plusMinutes((long) (task.getEstimatedTime() * 60));
                 TimeBlock timeBlock = new TimeBlock(task, randomStartTime, newEndTime);
-                // check if this is a valid position
+    
                 if (canInsertTimeBlock(timeBlock) && !checkIfIntersectingNight(timeBlock) &&
                     randomStartTime.isAfter(currentDateTime) && endTime.isAfter(newEndTime)) {
                     timeBlocks.add(timeBlock);
-                    addedBlock = timeBlock;  // Set the added block
                     System.out.println("Added TimeBlock: " + timeBlock);
-                    break;  // Exit the loop once a valid time block is found
+                    break;
                 }
             }
-            if (addedBlock != null) {
-                break;  // Stop searching once a time block is added
-            } else {
-                System.out.println("Failed to schedule task: " + task.getDescription());
-            }
         }
-        
         System.out.println(timeBlocks);
-        return addedBlock;
     }
 
     private TimeBlock addTaskAppendAlgorithm(Task task){
