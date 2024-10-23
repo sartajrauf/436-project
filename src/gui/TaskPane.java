@@ -28,6 +28,7 @@ public class TaskPane extends ScrollPane {
     private static final int HOURS_IN_DAY = 24;
     private static final int HOUR_HEIGHT = TOTAL_HEIGHT / HOURS_IN_DAY;
     private static final int DAY_WIDTH = 100;
+    private static final int MINIMUM_TASK_HEIGHT = 10;
 
     private Map<TimeBlock, Pane> timeBlockMap = new HashMap<>();
     BorderPane borderPane;
@@ -119,7 +120,7 @@ public class TaskPane extends ScrollPane {
         double duration = (double)timeBlock.getDuration().toMinutes() / 60; // Assuming TimeBlock has a method to get the duration
         double blockHeight = Math.min(
             Math.max(
-                HOUR_HEIGHT/4, 
+                MINIMUM_TASK_HEIGHT, 
                 duration * HOUR_HEIGHT
             ),
             TOTAL_HEIGHT - ((double)startTimeMinutes/60 * HOUR_HEIGHT) - HOUR_HEIGHT
@@ -130,6 +131,8 @@ public class TaskPane extends ScrollPane {
         timeBlockPane.setStyle("-fx-background-color: lightblue; -fx-border-color: black; -fx-border-width: 1px;"); // Styling for visibility
         timeBlockPane.setCenter(new Label(timeBlock.getTask().getDescription())); // Set task description in the center
         timeBlockPane.setPrefHeight(blockHeight); // Set the height of the time block
+        timeBlockPane.setMinHeight(blockHeight);
+        timeBlockPane.setMaxHeight(blockHeight);
         timeBlockPane.setPrefWidth(DAY_WIDTH); // Set the minimum width
 
         // Calculate the position relative to the gridPane

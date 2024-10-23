@@ -187,12 +187,12 @@ public class Schedule {
 
         // initial algorithm is greedy and just adds the task wherever there is room
         if (timeBlocks.isEmpty()) {
-            if (startTime.plusHours((long) task.getEstimatedTime()).isAfter(endTime)) {
+            if (startTime.plusMinutes((long)(task.getEstimatedTime() * 60)).isAfter(endTime)) {
                 System.out.println("No room to add task " + task.getDescription());
                 return null;
             } else {
                 TimeBlock timeBlock = new TimeBlock(task, startTime,
-                        startTime.plusHours((long) task.getEstimatedTime()));
+                        startTime.plusMinutes((long)(task.getEstimatedTime()*60)));
                 timeBlocks.add(timeBlock);
                 return timeBlock;
             }
@@ -200,7 +200,7 @@ public class Schedule {
 
         // find out if there is room for the new task
         TimeBlock lastTimeBlock = timeBlocks.get(timeBlocks.size() - 1);
-        LocalDateTime newEndTime = lastTimeBlock.getEndTime().plusHours((long) task.getEstimatedTime());
+        LocalDateTime newEndTime = lastTimeBlock.getEndTime().plusMinutes((long)(task.getEstimatedTime() * 60));
         if (newEndTime.isAfter(endTime)) {
             System.out.println("No room to add task " + task.getDescription());
             return null;
