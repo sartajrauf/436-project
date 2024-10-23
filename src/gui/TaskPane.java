@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import model.Schedule;
 import model.TimeBlock;
 
 
@@ -113,6 +114,7 @@ public class TaskPane extends ScrollPane {
         // if null then throw msg but don't crash
         if (timeBlock == null) {
             System.out.println("Can't add null timeblock.");
+            return;
         }
         // Determine the column index for the time block based on the day it represents
         int columnIndex = timeBlock.getStartTime().getDayOfWeek().getValue() - 1; // Assuming TimeBlock has a method to get the day
@@ -171,5 +173,13 @@ public class TaskPane extends ScrollPane {
             container.getChildren().remove(timeBlockPane);
         }
         timeBlockMap.clear();
+    }
+
+    // I have literally no clue why I made this function. I thought there was a need for it...
+    public void refresh(GUI gui, Schedule schedule){
+        removeAllTimeBlocks();
+        for (TimeBlock timeBlock : schedule.getTimeBlocks()) {
+            addTimeBlock(timeBlock, gui.new HandleEditEvent(timeBlock));
+        }
     }
 }
