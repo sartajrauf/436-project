@@ -24,11 +24,11 @@ public class TaskPane extends ScrollPane {
 
     
 
-    private static final int TOTAL_HEIGHT = 500;
-    private static final int HOURS_IN_DAY = 24;
-    private static final int HOUR_HEIGHT = TOTAL_HEIGHT / HOURS_IN_DAY;
-    private static final int DAY_WIDTH = 100;
-    private static final int MINIMUM_TASK_HEIGHT = 10;
+    public static final int TOTAL_HEIGHT = 500;
+    public static final int HOURS_IN_DAY = 24;
+    public static final int HOUR_HEIGHT = TOTAL_HEIGHT / HOURS_IN_DAY;
+    public static final int DAY_WIDTH = 100;
+    public static final int MINIMUM_TASK_HEIGHT = 10;
 
     private Map<TimeBlock, Pane> timeBlockMap = new HashMap<>();
     BorderPane borderPane;
@@ -81,6 +81,10 @@ public class TaskPane extends ScrollPane {
         drawGridLines();
 
         this.setContent(borderPane);
+    }
+
+    public void setActionOnScheduleClick(EventHandler<MouseEvent> eventHandler){
+        container.setOnMouseClicked(eventHandler);
     }
 
     public Map<TimeBlock, Pane> getTimeBlockMap(){

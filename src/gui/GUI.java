@@ -137,6 +137,27 @@ public class GUI extends Application {
                 updateTable(currentWeek.getSchedule());
             }
         });
+        
+        taskPane.setActionOnScheduleClick(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent eMouseEvent) {
+                double x = eMouseEvent.getX();
+                double y = eMouseEvent.getY();
+
+                // figure out what day column it is.
+                int dayCol = (int)(x/TaskPane.DAY_WIDTH);
+
+                // figure out what hour row it is.
+                int hourRow = (int)(y/TaskPane.HOUR_HEIGHT);
+
+                // begin task placement at that location down to the hour.
+                LocalDateTime newTime = currentWeek.getStartTime().plus(Duration.ofDays(dayCol).plus(Duration.ofHours(hourRow)));
+                TimeBlock timeBlock = addNewTaskAt(currentWeek.getSchedule(), newTime);
+                if (timeBlock != null){
+                    taskPane.addTimeBlock(timeBlock, new HandleEditEvent(timeBlock));
+                }
+            }
+        });
     }
 
     // sets the dimensions that elements must conform to to fit nicely on the
@@ -192,12 +213,12 @@ public class GUI extends Application {
         alert.showAndWait();
     }
 
-    private void addNewTaskAt(Schedule schedule, LocalDateTime time) {
+    private TimeBlock addNewTaskAt(Schedule schedule, LocalDateTime time) {
         TaskCreationDialog dialog = new TaskCreationDialog();
         Optional<Task> userRet = dialog.showTaskCreationDialog();
         if (userRet.isEmpty()) {
             // user likely cancelled input
-            return;
+            return null;
         }
         Task newTask = userRet.get();
         TimeBlock timeBlock = new TimeBlock(newTask, time,
@@ -212,8 +233,9 @@ public class GUI extends Application {
             alert.setTitle("Invalid Timeslot");
             alert.setHeaderText("Invalid Selection");
             alert.showAndWait();
+            return null;
         }
-
+        return timeBlock;
     }
 
     private void addNewTask(Schedule schedule) {
