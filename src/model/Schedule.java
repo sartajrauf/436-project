@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.random.RandomGenerator;
 
 /*
 * Schedule contains the TimeBlock and Task as well as a start time and end time
@@ -184,7 +185,10 @@ public class Schedule {
     // Add a task to the schedule. The task should automatically make the
     // TimeBlock necessary to insert itself into the schedule.
     public TimeBlock addTask(Task task) {
+        return addTaskRandomAlgorithm(task);
+    }
 
+    private TimeBlock addTaskAppendAlgorith(Task task){
         // initial algorithm is greedy and just adds the task wherever there is room
         if (timeBlocks.isEmpty()) {
             if (startTime.plusMinutes((long)(task.getEstimatedTime() * 60)).isAfter(endTime)) {
@@ -210,6 +214,35 @@ public class Schedule {
         TimeBlock timeBlock = new TimeBlock(task, lastTimeBlock.getEndTime(), newEndTime);
         timeBlocks.add(timeBlock);
         return timeBlock;
+    }
+
+    // TODO add test case
+    private TimeBlock addTaskRandomAlgorithm(Task task) {
+        int MAX_ATTEMPTS = 1000;
+
+        RandomGenerator random = RandomGenerator.of("Random");
+        for (int i = 0; i < MAX_ATTEMPTS; i++) {
+            LocalDateTime randomStartTime = startTime.plusMinutes(random.nextInt(7*24*30)*2);
+            LocalDateTime newEndTime = randomStartTime.plusMinutes((long)(task.getEstimatedTime() * 60));
+            TimeBlock timeBlock = new TimeBlock(task, randomStartTime, newEndTime);
+            // check if this is a valid position
+            if (canInsertTimeBlock(timeBlock) && !checkIfIntersectingNight(timeBlock)) {
+                // add the new task
+                timeBlocks.add(timeBlock);
+                return timeBlock;
+            }
+        }
+        System.out.println("No room to add task " + task.getDescription());
+        return null;
+    }
+
+    // TODO maybe add test case?
+    private boolean checkIfIntersectingNight(TimeBlock timeBlock){
+        if (timeBlock.getStartTime().getDayOfYear() != timeBlock.getEndTime().getDayOfYear() ||
+        timeBlock.getStartTime().getHour() < 5 || timeBlock.getStartTime().getHour() > 22){
+            return true;
+        }
+        return false;
     }
 
     // Add a timeblock to the schedule. We specifically do not wish for it to be
@@ -240,6 +273,18 @@ public class Schedule {
 
     public void removeAll(){
         timeBlocks.clear();
+    }
+
+    public boolean canInsertTimeBlock(TimeBlock timeBlock){
+        if (!isBound(timeBlock)){
+            return false;
+        }
+        for (TimeBlock other : timeBlocks) {
+            if (timeBlock.intersectsWith(other)){
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
