@@ -37,11 +37,13 @@ public class Schedule {
     }
     Algorithm selectedAlgorithm = Algorithm.RANDOM;
 
+
     // Constructor
     public Schedule(LocalDateTime startTime, LocalDateTime endTime) {
         this.timeBlocks = new ArrayList<>();
         this.startTime = startTime;
         this.endTime = endTime;
+        this.selectedAlgorithm = Algorithm.RANDOM;
     }
 
     // Getters
@@ -116,7 +118,7 @@ public class Schedule {
     // much of a point except for load balancing the schedule.
     public void removeTask(Task task) {
         timeBlocks.removeIf(block -> block.getTask().equals(task));
-        tasks.remove(task);
+        //tasks.remove(task);
     }
 
     // Merge with a different schedule. The merged schedule will be our
@@ -197,71 +199,68 @@ public class Schedule {
     // Add a task to the schedule. The task should automatically make the
     // TimeBlock necessary to insert itself into the schedule.
     public TimeBlock addTask(Task task) {
+        TimeBlock addedBlock = null;
+
+        //System.out.println("Adding task: " + task.getDescription() + " using " + selectedAlgorithm);
         switch (selectedAlgorithm) {
-            default:
-                return addTaskRandomAlgorithm(task);
+            case PRIORITY:
+                addedBlock = addTaskPriorityAlgorithm(List.of(task));
+                break;
+            case RANDOM:
+                addedBlock = addTaskRandomAlgorithm(task);
+                break;
         }
+        if (addedBlock == null) {
+            System.out.println("Can't add null timeblock for task: " + task.getDescription());
+        } else {
+            System.out.println("New Task Added: " + addedBlock);
+        }
+        return addedBlock;
     }
 
     //TODO: tests!!!
-    private void addTaskPriorityAlgorithm(List<Task> tasks){
+    private TimeBlock addTaskPriorityAlgorithm(List<Task> tasks){
         int len = tasks.size();
+        TimeBlock addedBlock = null;
         
-        //sorting by priority using insertion sort
-        for (int i = 1; i < len; i++) {
-            Task t = tasks.get(i); // Current element to be inserted
-            int j = i - 1;    // Index of the last sorted element
-
-            // Move elements of tasks[0..i-1], that are greater than t,
-            // to one position ahead of their current position
-            while (j >= 0 && tasks.get(j).getPriority() > t.getPriority()) {
-                tasks.set(j + 1, tasks.get(j));
-                j = j - 1;
+        // Sort tasks by priority, then by deadline if priorities are the same
+        tasks.sort((t1, t2) -> {
+            int cmp = Integer.compare(t1.getPriority(), t2.getPriority());
+            if (cmp == 0) {
+                return t1.getDeadline().compareTo(t2.getDeadline());
             }
-            // Insert the current element at its correct position
-            tasks.set(j + 1, t);
-        }
-
-        //sorts the tasks list further in terms of deadline
-        for (int i = 1; i < len; i++) {
-            Task t2 = tasks.get(i); // Current task to be inserted
-            int j = i - 1;       // Index of the last sorted task
-
-            // Move tasks that have the same priority and a later deadline
-            while (j >= 0 && tasks.get(j).getPriority() == t2.getPriority() && tasks.get(j).getDeadline().isAfter(t2.getDeadline())) {
-                tasks.set(j + 1, tasks.get(j)); // Shift task to the right
-                j--; // Move to the previous task
-            }
-            // Insert the current task at its correct position
-            tasks.set(j + 1, t2);
-        }
+            return cmp;
+        });
 
         RandomGenerator random = RandomGenerator.of("Random");
 
-        for (int i = 0; i < len; i++) {
+        for (Task task : tasks) {
             for (int j = 0; j < 10000; j++) {
                 LocalDateTime currentDateTime = LocalDateTime.now();
                 LocalDateTime randomStartTime = startTime.plusMinutes(random.nextInt(7*24*30)*2);
-                LocalDateTime newEndTime = randomStartTime.plusMinutes((long)(tasks.get(i).getEstimatedTime() * 60));
-                TimeBlock timeBlock = new TimeBlock(tasks.get(i), randomStartTime, newEndTime);
+                LocalDateTime newEndTime = randomStartTime.plusMinutes((long)(task.getEstimatedTime() * 60));
+                TimeBlock timeBlock = new TimeBlock(task, randomStartTime, newEndTime);
                 // check if this is a valid position
-                if (canInsertTimeBlock(timeBlock))  {
-                    if(!checkIfIntersectingNight(timeBlock) ){
-                        if ( randomStartTime.isAfter(currentDateTime)) {
-                            if (endTime.isBefore(tasks.get(i).getDeadline())){
-                                // add the new task
-                                timeBlocks.add(timeBlock);
-                                break;
-                            }
-                        }
-                    }
+                if (canInsertTimeBlock(timeBlock) && !checkIfIntersectingNight(timeBlock) &&
+                    randomStartTime.isAfter(currentDateTime) && endTime.isAfter(newEndTime)) {
+                    timeBlocks.add(timeBlock);
+                    addedBlock = timeBlock;  // Set the added block
+                    System.out.println("Added TimeBlock: " + timeBlock);
+                    break;  // Exit the loop once a valid time block is found
                 }
             }
+            if (addedBlock != null) {
+                break;  // Stop searching once a time block is added
+            } else {
+                System.out.println("Failed to schedule task: " + task.getDescription());
+            }
         }
+        
         System.out.println(timeBlocks);
+        return addedBlock;
     }
 
-    private TimeBlock addTaskAppendAlgorith(Task task){
+    private TimeBlock addTaskAppendAlgorithm(Task task){
         // initial algorithm is greedy and just adds the task wherever there is room
         if (timeBlocks.isEmpty()) {
             if (startTime.plusMinutes((long)(task.getEstimatedTime() * 60)).isAfter(endTime)) {
@@ -311,11 +310,16 @@ public class Schedule {
 
     // TODO maybe add test case?
     private boolean checkIfIntersectingNight(TimeBlock timeBlock){
+        int startHour = timeBlock.getStartTime().getHour();
+        return startHour < 5 || startHour > 22;
+
+        /**
         if (timeBlock.getStartTime().getDayOfYear() != timeBlock.getEndTime().getDayOfYear() ||
         timeBlock.getStartTime().getHour() < 5 || timeBlock.getStartTime().getHour() > 22){
             return true;
         }
         return false;
+        **/
     }
 
     // Add a timeblock to the schedule. We specifically do not wish for it to be
@@ -363,6 +367,7 @@ public class Schedule {
     @Override
     public String toString() {
 
+        if(timeBlocks.isEmpty()){return"";}
         String retval = "";
         for (TimeBlock timeblock : timeBlocks) {
             retval += timeblock.getTask().getDescription() + ": " +
@@ -381,6 +386,8 @@ public class Schedule {
     }
 
     public void notifyAlgorithmChange(Schedule.Algorithm selectedAlgorithm) {
+        System.out.println(" using " + selectedAlgorithm);
+    
         this.selectedAlgorithm = selectedAlgorithm;
     }
 }
