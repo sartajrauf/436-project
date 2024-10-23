@@ -238,6 +238,10 @@ public class Schedule {
         return timeBlocks.contains(timeBlock);
     }
 
+    public void removeAll(){
+        timeBlocks.clear();
+    }
+
     @Override
     public String toString() {
 
