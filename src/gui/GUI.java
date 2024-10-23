@@ -2,27 +2,19 @@ package gui;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -33,16 +25,6 @@ import model.Task;
 import model.TimeBlock;
 
 public class GUI extends Application {
-
-    private static final int DAYS_IN_WEEK = 7;
-    private static final int HOURS_IN_DAY = 24;
-    private static final String[] DAYS = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
-            "Saturday" };
-
-    // very temporary. Will have 24*7 = 168 slots
-    private List<Label> slots = new ArrayList<>(168);
-    private HashMap<Label, TimeBlock> slotsMap = new HashMap<>();
-    private HashMap<Label, Integer> slotsMapIndex = new HashMap<>();
 
     // backing structures
     Calendar calendar = new Calendar(LocalDateTime.of(2024, 10, 21, 0, 0, 0));
@@ -217,25 +199,11 @@ public class GUI extends Application {
         titleGrid.getColumnConstraints().add(leftAlignButton);
     }
 
-    // inclusive dateStart, exclusive dateEnd
-    private boolean dateLiesBetween(LocalDateTime dateBetween, LocalDateTime dateStart, LocalDateTime dateEnd) {
-        return (dateBetween.isAfter(dateStart) || dateBetween.isEqual(dateStart)) &&
-                (dateBetween.isBefore(dateEnd));
-    }
-
     private void updateTable(Schedule schedule) {
         taskPane.removeAllTimeBlocks();
         for (TimeBlock timeBlock : currentWeek.getSchedule().getTimeBlocks()) {
             taskPane.addTimeBlock(timeBlock, new HandleEditEvent(timeBlock));
         }
-    }
-
-    private void showAlert(String title, String content) {
-        Alert alert = new Alert(AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
     }
 
     private TimeBlock addNewTaskAt(Schedule schedule, LocalDateTime time) {
@@ -289,8 +257,6 @@ public class GUI extends Application {
         @Override
         public void handle(MouseEvent event) {
             System.out.println("I have been clicked: " + timeBlock);
-            TaskEditDialog dialog = new TaskEditDialog();
-            Optional<Boolean> reschedule = dialog.showEditDialog(currentWeek.getSchedule(), timeBlock);
             taskPane.removeTimeBlock(timeBlock);
             if (currentWeek.getSchedule().containsTimeBlock(timeBlock)) {
                 taskPane.addTimeBlock(timeBlock, this);
