@@ -192,9 +192,9 @@ public class Schedule {
     // TimeBlock necessary to insert itself into the schedule.
     public TimeBlock addTask(Task task) {
         switch (selectedAlgorithm) {
-            case Algorithm.RANDOM:
+            case RANDOM:
                 return addTaskRandomAlgorithm(task);
-            case Algorithm.INSERT_NEXT:
+            case INSERT_NEXT:
                 return addTaskAppendAlgorith(task);
             default:
                 return addTaskRandomAlgorithm(task);
