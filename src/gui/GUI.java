@@ -131,7 +131,7 @@ public class GUI extends Application {
             @Override
             public void handle(MouseEvent event) {
                 addNewTask(currentWeek.getSchedule());
-                // updateTable(currentWeek.getSchedule());
+                updateTable(currentWeek.getSchedule());
                 event.consume();
             }
         });
@@ -140,7 +140,7 @@ public class GUI extends Application {
             @Override
             public void handle(MouseEvent event) {
                 currentWeek.getSchedule().reschedule();
-                // updateTable(currentWeek.getSchedule());
+                updateTable(currentWeek.getSchedule());
                 event.consume();
             }
         });
