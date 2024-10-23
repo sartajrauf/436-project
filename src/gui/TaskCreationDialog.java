@@ -51,6 +51,35 @@ public class TaskCreationDialog {
             return Optional.empty();
         }
 
+        //Step 4: Set the priority of the tast
+        //TODO: Create tests for this
+        TextInputDialog prio =  new TextInputDialog();
+        prio.setTitle("Task Priority");
+        prio.setHeaderText("Enter the priority of the task (1-10). 1 having the highest priority.");
+        prio.setContentText("Priority:");
+
+        Optional<String> prioResult = prio.showAndWait();
+
+        if (!prioResult.isPresent()) {
+            return Optional.empty(); // User cancelled input
+        }
+        
+        String prioInput = prioResult.get().trim();
+
+        int p = 1;
+        if(!prioInput.isEmpty()){
+            try {
+                p = Integer.parseInt(prioInput);
+                if (p <= 0 || p >=11) {
+                    showAlert("Invalid Input", "Priority should be between 1-10 inclusively.");
+                    return Optional.empty();
+                }
+            } catch (NumberFormatException e) {
+                showAlert("Invalid Input", "Please enter a valid number for the Priority.");
+                return Optional.empty();
+            }
+        }
+
         // Step 3: Create dialog to get deadline date and time
         DatePicker deadlinePicker = new DatePicker();
         deadlinePicker.setPromptText("Select Deadline Date");
@@ -63,7 +92,7 @@ public class TaskCreationDialog {
 
         Dialog<ButtonType> deadlineDialog = new Dialog<>();
         deadlineDialog.setTitle("Add New Task");
-        deadlineDialog.setHeaderText("Select Deadline Date and Time");
+        deadlineDialog.setHeaderText("Select Deadline Date and Time. Format: 10/23/2024, 15:12");
 
         ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         deadlineDialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
@@ -92,6 +121,7 @@ public class TaskCreationDialog {
 
             // Step 4: Create the task and return it
             Task newTask = new Task(taskName, estimatedTime, deadline);
+            newTask.setPriority(p);
             return Optional.of(newTask);
         } else {
             return Optional.empty(); // User cancelled or closed the dialog
