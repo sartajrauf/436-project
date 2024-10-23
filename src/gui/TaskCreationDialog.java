@@ -51,13 +51,55 @@ public class TaskCreationDialog {
             return Optional.empty();
         }
 
-      //  TextInputDialog prio =  new TextInputDialog();
-       // prio.setTitle("Add New Task");
-       // prio.setHeaderText("Enter the priority of the task");
-       // prio.setContentText("Importance:");
-
+        
         // Step 3: Create the task and return it
         Task newTask = new Task(taskName, estimatedTime);
+
+        //Step 4: Set the priority of the tast
+        //TODO: Create tests for this
+        TextInputDialog prio =  new TextInputDialog();
+        prio.setTitle("Task Priority");
+        prio.setHeaderText("Enter the priority of the task (1-10). 1 having the highest priority.");
+        prio.setContentText("Priority:");
+
+        Optional<String> prioResult = prio.showAndWait();
+
+        if (!prioResult.isPresent()) {
+            return Optional.empty(); // User cancelled input
+        }
+        
+        String prioInput = prioResult.get().trim();
+
+        int p;
+        if(!prioInput.isEmpty()){
+            try {
+                p = Integer.parseInt(prioInput);
+                if (p <= 0 || p >=11) {
+                    showAlert("Invalid Input", "Priority should be between 1-10 inclusively.");
+                    return Optional.empty();
+                }
+            } catch (NumberFormatException e) {
+                showAlert("Invalid Input", "Please enter a valid number for the Priority.");
+                return Optional.empty();
+            }
+            newTask.setPriorty(p);
+        }
+
+        //Step 5: Set deadline for the task.
+        //TODO: Create tests for this.
+        TextInputDialog dl =  new TextInputDialog();
+        dl.setTitle("Task Deadline");
+        dl.setHeaderText("Enter the dealine of the task. Format: 10/23/2024, 15:12");
+        dl.setContentText("Date and Time:");
+
+        Optional<String> dlResult = dl.showAndWait();
+
+        if (!dlResult.isPresent()) {
+            return Optional.empty(); // User cancelled input
+        }
+
+        
+
         return Optional.of(newTask);
     }
 

@@ -1,4 +1,7 @@
 package model;
+import java.time.LocalDateTime;
+
+import javafx.util.converter.LocalDateStringConverter;
 /**
  * This is the Task class. It probably will not get that eventful here.
  * We need it to contain all the data for the task itself. Whatever the user
@@ -8,7 +11,8 @@ package model;
 public class Task {
     private String description;
     private double estimatedTime;
-
+    private int priority;
+    private LocalDateTime deadline;
     // Constructor
     public Task(String description, double estimatedTime) {
         this.description = description;
@@ -31,6 +35,22 @@ public class Task {
 
     public void setEstimatedTime(double estimatedTime) {
         this.estimatedTime = estimatedTime;
+    }
+
+    public void setPriorty(int p) {
+        this.priority =p;
+    }
+
+    public int getPriority (){
+        return this.priority;
+    }
+
+    public void setDeadline(int year, int month, int day, int hr, int min ) {
+        this.deadline = LocalDateTime.of(year, month, day, hr, min);
+    }
+
+    public LocalDateTime getDeadline (){
+        return this.deadline;
     }
 
     @Override
