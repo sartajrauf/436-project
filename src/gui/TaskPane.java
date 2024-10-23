@@ -116,7 +116,7 @@ public class TaskPane extends ScrollPane {
 
         // Calculate the required height for the time block
         int startTimeMinutes = timeBlock.getStartTime().getHour() * 60 + (int)timeBlock.getStartTime().getMinute(); // Assuming TimeBlock has a method to get the start hour
-        double duration = timeBlock.getDuration().toMinutes() / 60; // Assuming TimeBlock has a method to get the duration
+        double duration = (double)timeBlock.getDuration().toMinutes() / 60; // Assuming TimeBlock has a method to get the duration
         double blockHeight = Math.min(
             Math.max(
                 HOUR_HEIGHT/4, 
@@ -134,7 +134,7 @@ public class TaskPane extends ScrollPane {
 
         // Calculate the position relative to the gridPane
         double xPos = (columnIndex * DAY_WIDTH); // Position based on the column index
-        double yPos = (startTimeMinutes / 60 * HOUR_HEIGHT); // Position based on the row index
+        double yPos = ((double)startTimeMinutes / 60 * HOUR_HEIGHT); // Position based on the row index
 
         // Set the layout position of the time block pane
         timeBlockPane.setLayoutX(xPos);
