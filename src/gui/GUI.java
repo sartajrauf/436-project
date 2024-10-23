@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.input.MouseEvent;
@@ -30,6 +31,7 @@ public class GUI extends Application {
     // backing structures
     Calendar calendar = new Calendar(LocalDateTime.of(2024, 10, 21, 0, 0, 0));
     CalendarWeek currentWeek = calendar.getCurrentWeek();
+    ComboBox<Schedule.Algorithm> algorithmComboBox = new ComboBox<>();
 
     // decorative elements
     Label title = new Label(currentWeek.getTimeframeString());
@@ -47,6 +49,7 @@ public class GUI extends Application {
     private Button rescheduleButton = new Button("Reschedule Task");
     private Button loadExampleButton = new Button("Load Example");
 
+
     @Override
     public void start(Stage primaryStage) {
 
@@ -59,11 +62,15 @@ public class GUI extends Application {
         window.add(titleGrid, 0, 0);
         window.add(taskPane, 0, 1);
 
+        algorithmComboBox.getItems().addAll(Schedule.Algorithm.RANDOM, Schedule.Algorithm.INSERT_NEXT); // Add your algorithms
+        algorithmComboBox.getSelectionModel().selectFirst(); // Select the first algorithm by default
+
         // add the action pane and all element inside it; the action pane will always bu
         // 200px tall
         actionGrid.add(addNewTaskButton, 0, 0);
         actionGrid.add(rescheduleButton, 1, 0);
         actionGrid.add(loadExampleButton, 2, 0);
+        actionGrid.add(algorithmComboBox, 3, 0);
         
         window.add(actionGrid, 0, 2);
 
@@ -91,6 +98,11 @@ public class GUI extends Application {
         primaryStage.maximizedProperty().addListener((obs, oldVal, newVal) -> {
             // this isn't working for some reason, will figure it out later
             setElementSizes();
+        });
+
+        algorithmComboBox.setOnAction(event -> {
+            Schedule.Algorithm selectedAlgorithm = algorithmComboBox.getSelectionModel().getSelectedItem();
+            currentWeek.getSchedule().notifyAlgorithmChange(selectedAlgorithm);
         });
 
         previousWeekButton.setOnMouseClicked(new EventHandler<MouseEvent>() {

@@ -31,6 +31,12 @@ public class Schedule {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
+    public enum Algorithm {
+        INSERT_NEXT,
+        RANDOM
+    }
+    Algorithm selectedAlgorithm = Algorithm.RANDOM;
+
     // Constructor
     public Schedule(LocalDateTime startTime, LocalDateTime endTime) {
         this.timeBlocks = new ArrayList<>();
@@ -185,7 +191,14 @@ public class Schedule {
     // Add a task to the schedule. The task should automatically make the
     // TimeBlock necessary to insert itself into the schedule.
     public TimeBlock addTask(Task task) {
-        return addTaskRandomAlgorithm(task);
+        switch (selectedAlgorithm) {
+            case Algorithm.RANDOM:
+                return addTaskRandomAlgorithm(task);
+            case Algorithm.INSERT_NEXT:
+                return addTaskAppendAlgorith(task);
+            default:
+                return addTaskRandomAlgorithm(task);
+        }
     }
 
     private TimeBlock addTaskAppendAlgorith(Task task){
@@ -305,5 +318,9 @@ public class Schedule {
             tasks.add(timeBlock.getTask());
         }
         return tasks;
+    }
+
+    public void notifyAlgorithmChange(Schedule.Algorithm selectedAlgorithm) {
+        this.selectedAlgorithm = selectedAlgorithm;
     }
 }
