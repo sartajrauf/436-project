@@ -313,10 +313,20 @@ public class Schedule {
     // This will insert even if there is already a timeblock in the way.
     // Will throw exception if out of bounds
     public void addTimeBlockManually(TimeBlock timeBlock) {
+        adjustScheduleBounds(timeBlock);
         if (!isBound(timeBlock)) {
             throw new RuntimeException("Tried to add timeblock outside of schedule bounds.");
         }
         timeBlocks.add(timeBlock);
+    }
+    private void adjustScheduleBounds(TimeBlock timeBlock) {
+        // Adjust startTime and endTime dynamically if the new timeBlock goes beyond current bounds
+        if (timeBlock.getStartTime().isBefore(startTime)) {
+            startTime = timeBlock.getStartTime();
+        }
+        if (timeBlock.getEndTime().isAfter(endTime)) {
+            endTime = timeBlock.getEndTime();
+        }
     }
 
     // Check if the given timeBlock is valid inside our schedule bounds (start and

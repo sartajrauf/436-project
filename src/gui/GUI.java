@@ -29,7 +29,7 @@ import model.TimeBlock;
 public class GUI extends Application {
 
     // backing structures
-    Calendar calendar = new Calendar(LocalDateTime.of(2024, 10, 21, 0, 0, 0));
+    Calendar calendar = new Calendar(LocalDateTime.now());
     CalendarWeek currentWeek = calendar.getCurrentWeek();
     ComboBox<Schedule.Algorithm> algorithmComboBox = new ComboBox<>();
 
