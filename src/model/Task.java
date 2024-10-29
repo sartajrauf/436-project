@@ -22,7 +22,7 @@ public class Task {
         this.deadline = (deadline == null) ? LocalDateTime.now().plusWeeks(1) : deadline;
     }
 
-    public Task(String name, double estimate){this(name, 0, estimate, null);}
+    public Task(String name, double estimate){this(name, 5, estimate, null);}
 
     public Task(String description, Integer priority) {this(description, priority, 0.0, null);}
 

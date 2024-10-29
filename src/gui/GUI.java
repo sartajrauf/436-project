@@ -252,17 +252,23 @@ public class GUI extends Application {
         TaskCreationDialog dialog = new TaskCreationDialog();
         Optional<Task> userRet = dialog.showTaskCreationDialog();
         if (userRet.isEmpty()) {
-            // user likely cancelled input
+            // User likely cancelled input
             return;
         }
         Task newTask = userRet.get();
-
-        // Add task to the calendar or any data structure you're using for tasks
+    
+        // Add task to the schedule
         TimeBlock timeBlock = schedule.addTask(newTask);
-        System.out.println("New Task Added: " + timeBlock);
-
-        taskPane.addTimeBlock(timeBlock, new HandleEditEvent(timeBlock));
+        if (timeBlock != null) {
+            System.out.println("New Task Added: " + timeBlock);
+            
+            // Refresh the UI to reflect the updated schedule
+            updateTable(schedule);
+        } else {
+            System.out.println("Failed to add task.");
+        }
     }
+    
 
     public class HandleEditEvent implements EventHandler<MouseEvent> {
 

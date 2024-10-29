@@ -11,6 +11,7 @@ package model;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.random.RandomGenerator;
@@ -32,10 +33,7 @@ public class Schedule {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-    public enum Algorithm {
-        PRIORITY,
-        RANDOM
-    }
+    public enum Algorithm {PRIORITY,RANDOM}
     Algorithm selectedAlgorithm = Algorithm.RANDOM;
 
 
@@ -48,17 +46,9 @@ public class Schedule {
     }
 
     // Getters
-    public List<TimeBlock> getTimeBlocks() {
-        return timeBlocks;
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
+    public List<TimeBlock> getTimeBlocks() {return timeBlocks;}
+    public LocalDateTime getStartTime() {return startTime;}
+    public LocalDateTime getEndTime() {return endTime;}
 
     /*
      * Get the earliest task in the schedule determined by the start time of
@@ -73,10 +63,9 @@ public class Schedule {
         return timeBlocks.get(0).getTask();
     }
 
-    // TODO: maybe also calculate the total duration of estimated time from the
-    // tasks?
+    public void removeTask(Task task) {timeBlocks.removeIf(block -> block.getTask().equals(task));}
 
-    // Setters
+
     // Set the start time, reschedule blocks if needed
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
@@ -113,19 +102,11 @@ public class Schedule {
         }
     }
 
-    // Methods
-    // Remove a task from the schedule and its associated timeblock. Whether
-    // the schedule is rescheduled doesn't matter here. Although there isn't
-    // much of a point except for load balancing the schedule.
-    public void removeTask(Task task) {
-        timeBlocks.removeIf(block -> block.getTask().equals(task));
-        //tasks.remove(task);
-    }
-
-    // Merge with a different schedule. The merged schedule will be our
-    // current schedule with the start and end times expanded to include both
-    // schedules. Additionally, the tasks will have to be rescheduled in such
-    // a way that it is valid again (it likely will be invalid after merging).
+    /*  Merge with a different schedule. The merged schedule will be our
+        current schedule with the start and end times expanded to include both
+        chedules. Additionally, the tasks will have to be rescheduled in such
+        a way that it is valid again (it likely will be invalid after merging).
+    */
     public void mergeWith(Schedule schedule) {
 
         // add each time block from the other schedule into this one; add task will take
@@ -144,27 +125,28 @@ public class Schedule {
         }
     }
 
-    // Reschedule all timeblocks. This is a dumb implementation.
-    // We want to visibly see a new schedule being made with the
-    // existing tasks. We will shuffle/randomize the positions
-    // for more clear feature demonstrations. In the future
-    // we should look into rescheduling in a more useful way.
-    // (So like keeping and using old information to improve
-    // rather than throwing it away).
-    // TODO make test case (can't really think of a good one at the moment sry)
+    /*  Reschedule all timeblocks. This is a dumb implementation.
+        We want to visibly see a new schedule being made with the
+        existing tasks. We will shuffle/randomize the positions
+        for more clear feature demonstrations. In the future
+        we should look into rescheduling in a more useful way.
+        (So like keeping and using old information to improve
+        rather than throwing it away).
+        TODO make test case (can't really think of a good one at the moment sry)
+    */
     public void reschedule() {
-        // collect all of our tasks (throw away all other information)
+        // Collect all tasks
         List<Task> tasks = getTasks();
-        timeBlocks.clear();
+        timeBlocks.clear();  // Clear timeBlocks to allow rescheduling
 
-        if(selectedAlgorithm== Algorithm.PRIORITY){
+        if (selectedAlgorithm == Algorithm.PRIORITY) {
+            tasks.sort(Comparator.comparing(Task::getPriority));
+            
+            // Add sorted tasks to the schedule using the updated priority algorithm
             addTaskPriorityAlgorithm(tasks);
-        }
-        else{
-        // shuffle them somehow.
+        } else {
+            // Randomly shuffle tasks and add them to the schedule
             Collections.shuffle(tasks);
-
-            // start adding them all back
             for (Task task : tasks) {
                 addTask(task);
             }
@@ -197,52 +179,132 @@ public class Schedule {
         return true;
     }
 
-    // Add a task to the schedule. The task should automatically make the
-    // TimeBlock necessary to insert itself into the schedule.
+    /*  Add a task to the schedule. The task should automatically make the
+        TimeBlock necessary to insert itself into the schedule.
+    */
     public TimeBlock addTask(Task task) {
-        switch (selectedAlgorithm) {
-            case PRIORITY:
-                addTaskPriorityAlgorithm(new ArrayList<>(List.of(task))); // Use a mutable list
-                break;
-            case RANDOM:
-                return addTaskRandomAlgorithm(task);
+        if (task == null) {
+            throw new IllegalArgumentException("Task must not be null");
         }
-        return null;
+    
+        // Create a placeholder TimeBlock with the current available slot
+        LocalDateTime nextAvailableSlot = findNextAvailableSlot(task.getEstimatedTime());
+        if (nextAvailableSlot == null) {
+            System.out.println("No available slot for task with priority: " + task.getPriority());
+            return null;
+        }
+    
+        LocalDateTime end = nextAvailableSlot.plusMinutes((long) (task.getEstimatedTime() * 60));
+        TimeBlock newTimeBlock = new TimeBlock(task, nextAvailableSlot, end);
+        
+        // Add the new TimeBlock to the list
+        timeBlocks.add(newTimeBlock);
+    
+        // Sort the tasks by priority
+        sortTasksByPriority();
+    
+        // Reassign start and end times for all tasks based on new priority order
+        assignStartTimes();
+    
+        // Print out to confirm the addition
+        System.out.println("New Task Added: " + newTimeBlock);
+    
+        return newTimeBlock;
     }
+
+
+    private void assignStartTimes() {
+    LocalDateTime currentTime = startTime;
+
+    for (TimeBlock timeBlock : timeBlocks) {
+        // Calculate the new end time for each block based on its estimated time
+        LocalDateTime newEndTime = currentTime.plusMinutes((long) (timeBlock.getTask().getEstimatedTime() * 60));
+        
+        // Update the TimeBlock with the new start and end times
+        timeBlock.setStartTime(currentTime);
+        timeBlock.setEndTime(newEndTime);
+        
+        // Update currentTime to be the end time of the last block to use for the next one
+        currentTime = newEndTime;
+    }
+}
+
     
 
-    //TODO: tests!!!
     private void addTaskPriorityAlgorithm(List<Task> tasks) {
-        // Convert to a mutable list
-        List<Task> mutableTasks = new ArrayList<>(tasks);
-    
-        // Sort tasks by priority, then by deadline if priorities are the same
-        mutableTasks.sort((t1, t2) -> {
-            int cmp = Integer.compare(t1.getPriority(), t2.getPriority());
-            if (cmp == 0) {
-                return t1.getDeadline().compareTo(t2.getDeadline());
+        tasks.sort((t1, t2) -> {
+            int priorityComparison = Integer.compare(t1.getPriority(), t2.getPriority());
+            if (priorityComparison == 0) {
+                if (t1.getDeadline() != null && t2.getDeadline() != null) {
+                    return t1.getDeadline().compareTo(t2.getDeadline());
+                } else if (t1.getDeadline() == null) {
+                    return 1; // Task without deadline goes after those with deadlines
+                } else {
+                    return -1;
+                }
             }
-            return cmp;
+            return priorityComparison;
         });
     
-        // Continue with the rest of the priority algorithm...
-        Random random = new Random();
-        for (Task task : mutableTasks) {
-            for (int j = 0; j < 10000; j++) {
-                LocalDateTime currentDateTime = LocalDateTime.now();
-                LocalDateTime randomStartTime = startTime.plusMinutes(random.nextInt(7 * 24 * 30) * 2);
-                LocalDateTime newEndTime = randomStartTime.plusMinutes((long) (task.getEstimatedTime() * 60));
-                TimeBlock timeBlock = new TimeBlock(task, randomStartTime, newEndTime);
+        // Try to add each task to the schedule
+        for (Task task : tasks) {
+            boolean successfullyAdded = false;
     
-                if (canInsertTimeBlock(timeBlock) && !checkIfIntersectingNight(timeBlock) &&
-                    randomStartTime.isAfter(currentDateTime) && endTime.isAfter(newEndTime)) {
-                    timeBlocks.add(timeBlock);
-                    System.out.println("Added TimeBlock: " + timeBlock);
+            for (int attempt = 0; attempt < 1000; attempt++) {
+                LocalDateTime startCandidate = findNextAvailableSlot(task.getEstimatedTime());
+                if (startCandidate != null) {
+                    LocalDateTime endCandidate = startCandidate.plusMinutes((long) (task.getEstimatedTime() * 60));
+                    TimeBlock timeBlock = new TimeBlock(task, startCandidate, endCandidate);
+    
+                    if (canInsertTimeBlock(timeBlock)) {
+                        timeBlocks.add(timeBlock);
+                        successfullyAdded = true;
+                        System.out.println("Added TimeBlock: " + timeBlock);
+                        break;
+                    }
+                }
+            }
+    
+            if (!successfullyAdded) {
+                System.out.println("Could not add task with priority: " + task.getPriority() + " and description: " + task.getDescription());
+            }
+        }
+    }
+
+    private LocalDateTime findNextAvailableSlot(double estimatedTime) {
+        LocalDateTime candidate = startTime;
+    
+        if (!timeBlocks.isEmpty()) {
+        // Start searching after the end of the last scheduled time block
+        candidate = timeBlocks.get(timeBlocks.size() - 1).getEndTime();
+    }
+
+        // Iterate through the existing time blocks to find the first available slot
+        while (candidate.isBefore(endTime)) {
+            LocalDateTime candidateEnd = candidate.plusMinutes((long) (estimatedTime * 60));
+    
+            // Check if this candidate time range overlaps with existing time blocks
+            boolean conflict = false;
+            for (TimeBlock block : timeBlocks) {
+                if (candidate.isBefore(block.getEndTime()) && candidateEnd.isAfter(block.getStartTime())) {
+                    conflict = true;
+                    // Move candidate past the conflicting time block
+                    candidate = block.getEndTime();
                     break;
                 }
             }
+    
+            // If no conflict, this candidate slot is available
+            if (!conflict && candidateEnd.isBefore(endTime)) {
+                return candidate;
+            }
+    
+            // Increment candidate time by 15 minutes if there's no available slot yet
+            candidate = candidate.plusMinutes(15);
         }
-        System.out.println(timeBlocks);
+    
+        // Return null if no slot is found
+        return null;
     }
 
     private TimeBlock addTaskAppendAlgorithm(Task task){
@@ -272,6 +334,38 @@ public class Schedule {
         timeBlocks.add(timeBlock);
         return timeBlock;
     }
+
+    private void sortTasksByPriority() {
+        timeBlocks.sort((t1, t2) -> {
+            Task task1 = t1.getTask();
+            Task task2 = t2.getTask();
+    
+            // Sort by priority: lower value = higher priority
+            int priorityComparison = Integer.compare(task1.getPriority(), task2.getPriority());
+    
+            // If priorities are equal, sort by deadline
+            if (priorityComparison == 0) {
+                LocalDateTime deadline1 = task1.getDeadline();
+                LocalDateTime deadline2 = task2.getDeadline();
+    
+                if (deadline1 == null && deadline2 == null) {
+                    return 0; // Both deadlines are null, consider them equal
+                }
+                if (deadline1 == null) {
+                    return 1; // Null deadlines go after
+                }
+                if (deadline2 == null) {
+                    return -1; // Non-null deadlines go before null
+                }
+    
+                return deadline1.compareTo(deadline2);
+            }
+    
+            return priorityComparison;
+        });
+    }
+    
+    
 
     // TODO add test case
     private TimeBlock addTaskRandomAlgorithm(Task task) {
@@ -343,9 +437,7 @@ public class Schedule {
         return timeBlocks.contains(timeBlock);
     }
 
-    public void removeAll(){
-        timeBlocks.clear();
-    }
+    public void removeAll(){timeBlocks.clear();} 
 
     public boolean canInsertTimeBlock(TimeBlock timeBlock){
         if (!isBound(timeBlock)){
@@ -382,7 +474,6 @@ public class Schedule {
 
     public void notifyAlgorithmChange(Schedule.Algorithm selectedAlgorithm) {
         System.out.println(" using " + selectedAlgorithm);
-    
         this.selectedAlgorithm = selectedAlgorithm;
     }
 }
