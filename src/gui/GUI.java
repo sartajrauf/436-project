@@ -22,16 +22,19 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import model.Calendar;
 import model.CalendarWeek;
+import model.PriorityAlgorithm;
+import model.RandomAlgorithm;
 import model.Schedule;
 import model.Task;
 import model.TimeBlock;
+import model.Algorithm;
 
 public class GUI extends Application {
 
     // backing structures
     Calendar calendar = new Calendar(LocalDateTime.now());
     CalendarWeek currentWeek = calendar.getCurrentWeek();
-    ComboBox<Schedule.Algorithm> algorithmComboBox = new ComboBox<>();
+    ComboBox<Algorithm> algorithmComboBox = new ComboBox<>();
 
     // decorative elements
     Label title = new Label(currentWeek.getTimeframeString());
@@ -62,7 +65,7 @@ public class GUI extends Application {
         window.add(titleGrid, 0, 0);
         window.add(taskPane, 0, 1);
 
-        algorithmComboBox.getItems().addAll(Schedule.Algorithm.RANDOM, Schedule.Algorithm.PRIORITY); // Add your algorithms
+        algorithmComboBox.getItems().addAll(new RandomAlgorithm(), new PriorityAlgorithm());
         algorithmComboBox.getSelectionModel().selectFirst(); // Select the first algorithm by default
 
         // add the action pane and all element inside it; the action pane will always bu
@@ -101,8 +104,8 @@ public class GUI extends Application {
         });
 
         algorithmComboBox.setOnAction(event -> {
-            Schedule.Algorithm selectedAlgorithm = algorithmComboBox.getSelectionModel().getSelectedItem();
-            currentWeek.getSchedule().notifyAlgorithmChange(selectedAlgorithm);
+            Algorithm selectedAlgorithm = algorithmComboBox.getSelectionModel().getSelectedItem();
+            currentWeek.getSchedule().setAlgorithm(selectedAlgorithm);
         });
 
         previousWeekButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -138,7 +141,14 @@ public class GUI extends Application {
         rescheduleButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                currentWeek.getSchedule().reschedule();
+                Algorithm currentAlgorithm = currentWeek.getSchedule().getAlgorithm();
+    
+                if (currentAlgorithm instanceof PriorityAlgorithm) {
+                    ((PriorityAlgorithm) currentAlgorithm).reschedule(currentWeek.getSchedule());
+                } else if (currentAlgorithm instanceof RandomAlgorithm) {
+                    ((RandomAlgorithm) currentAlgorithm).reschedule(currentWeek.getSchedule());
+                }
+                
                 updateTable(currentWeek.getSchedule());
                 event.consume();
             }
