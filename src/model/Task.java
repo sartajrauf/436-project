@@ -1,10 +1,6 @@
 package model;
 import java.time.LocalDateTime;
 
-import javafx.util.converter.LocalDateStringConverter;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 /**
  * This is the Task class. It probably will not get that eventful here.
@@ -15,18 +11,23 @@ import java.time.LocalDateTime;
 public class Task {
     private String description;
     private double estimatedTime;
-    private int priority;
+    private Integer priority;
     private LocalDateTime deadline;
+
     // Constructor
-    public Task(String description, double estimatedTime, LocalDateTime deadline) {
+    public Task(String description,Integer priority, double estimatedTime, LocalDateTime deadline) {
         this.description = description;
+        this.priority = priority;
         this.estimatedTime = estimatedTime;
-        this.deadline = deadline;
+        this.deadline = (deadline == null) ? LocalDateTime.now().plusWeeks(1) : deadline;
     }
 
-    public Task(String description, double estimatedTime) {
-        this(description, estimatedTime, null);
-    }
+    public Task(String name, double estimate){this(name, 5, estimate, null);}
+
+    public Task(String description, Integer priority) {this(description, priority, 0.0, null);}
+
+    public boolean isFullyInitialized() {return description != null && priority != null;}
+
 
     public String getDescription() {
         return description;
@@ -56,7 +57,7 @@ public class Task {
         this.priority = p;
     }
 
-    public int getPriority() {
+    public Integer getPriority() {
         return this.priority;
     }
 

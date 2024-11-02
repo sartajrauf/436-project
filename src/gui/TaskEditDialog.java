@@ -136,6 +136,7 @@ public class TaskEditDialog {
             } else if (dialogButton == removeButtonType) {
                 // Handle the "Remove Task" button click
                 schedule.removeTask(timeBlock.getTask());
+                
                 return false;
             }
             return null; // If canceled

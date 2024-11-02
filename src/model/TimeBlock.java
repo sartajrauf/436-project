@@ -16,11 +16,7 @@ public class TimeBlock {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-    // TODO: maybe there should be a method to automatically detemine duration?
-    // The tasks have estimated times to maybe this can be done by timeblock
-    // alternatively Schedule can have that job.
-
-    // Constructor
+    // Constructors
     public TimeBlock(Task task, LocalDateTime startTime, LocalDateTime endTime) {
         this.task = task;
         this.startTime = startTime;
@@ -28,8 +24,17 @@ public class TimeBlock {
     }
 
     public TimeBlock(Task task, LocalDateTime startTime, Duration duration) {
-        this(task, startTime, startTime.plus(duration)); // Calls the original constructor
+        this(task, startTime, startTime.plus(duration)); 
     }
+
+    public TimeBlock(Task task){
+        this.task = task;
+
+        // Provide sensible defaults for startTime and endTime (e.g., default to start now, end based on estimated time)
+        this.startTime = LocalDateTime.now(); // Default to current time for startTime
+        this.endTime = startTime.plusHours((long) Math.ceil(task.getEstimatedTime())); // Estimate the duration based on task's estimated time
+    }
+
 
     // Getters
     public Task getTask() {

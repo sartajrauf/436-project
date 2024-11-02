@@ -29,7 +29,7 @@ import model.TimeBlock;
 public class GUI extends Application {
 
     // backing structures
-    Calendar calendar = new Calendar(LocalDateTime.of(2024, 10, 21, 0, 0, 0));
+    Calendar calendar = new Calendar(LocalDateTime.now());
     CalendarWeek currentWeek = calendar.getCurrentWeek();
     ComboBox<Schedule.Algorithm> algorithmComboBox = new ComboBox<>();
 
@@ -62,7 +62,7 @@ public class GUI extends Application {
         window.add(titleGrid, 0, 0);
         window.add(taskPane, 0, 1);
 
-        algorithmComboBox.getItems().addAll(Schedule.Algorithm.RANDOM, Schedule.Algorithm.INSERT_NEXT); // Add your algorithms
+        algorithmComboBox.getItems().addAll(Schedule.Algorithm.RANDOM, Schedule.Algorithm.PRIORITY); // Add your algorithms
         algorithmComboBox.getSelectionModel().selectFirst(); // Select the first algorithm by default
 
         // add the action pane and all element inside it; the action pane will always bu
@@ -252,17 +252,23 @@ public class GUI extends Application {
         TaskCreationDialog dialog = new TaskCreationDialog();
         Optional<Task> userRet = dialog.showTaskCreationDialog();
         if (userRet.isEmpty()) {
-            // user likely cancelled input
+            // User likely cancelled input
             return;
         }
         Task newTask = userRet.get();
-
-        // Add task to the calendar or any data structure you're using for tasks
+    
+        // Add task to the schedule
         TimeBlock timeBlock = schedule.addTask(newTask);
-        System.out.println("New Task Added: " + timeBlock);
-
-        taskPane.addTimeBlock(timeBlock, new HandleEditEvent(timeBlock));
+        if (timeBlock != null) {
+            System.out.println("New Task Added: " + timeBlock);
+            
+            // Refresh the UI to reflect the updated schedule
+            updateTable(schedule);
+        } else {
+            System.out.println("Failed to add task.");
+        }
     }
+    
 
     public class HandleEditEvent implements EventHandler<MouseEvent> {
 
