@@ -29,6 +29,7 @@ import model.Schedule;
 import model.Task;
 import model.TimeBlock;
 import model.Algorithm;
+import model.Scheduler;
 
 public class GUI extends Application {
 
@@ -270,27 +271,11 @@ public class GUI extends Application {
         }
         Task newTask = userRet.get();
     
-        // Determine the latest possible start time for the task
-        LocalDateTime latestStart = newTask.getDeadline() != null
-            ? newTask.getDeadline().minus(Duration.ofMinutes((long) (newTask.getEstimatedTime() * 60)))
-            : currentWeek.getEndTime().minus(Duration.ofMinutes((long) (newTask.getEstimatedTime() * 60)));
+        // Use Scheduler to find the best slot within the current week
+        Scheduler scheduler = new Scheduler(schedule);
+        TimeBlock timeBlock = scheduler.scheduleTaskWithinWeek(newTask, currentWeek.getStartTime(), currentWeek.getEndTime());
     
-        // Ensure latestStart is within the current week's end boundary
-        if (latestStart.isAfter(currentWeek.getEndTime())) {
-            latestStart = currentWeek.getEndTime().minus(Duration.ofMinutes((long) (newTask.getEstimatedTime() * 60)));
-        }
-    
-        // Try scheduling the task near the end of the week
-        LocalDateTime taskStartTime = schedule.findNextAvailableSlotWithinBounds(latestStart, currentWeek.getEndTime(), newTask.getEstimatedTime());
-        
-        // If no available slot near the deadline, fall back to the earliest time
-        if (taskStartTime == null) {
-            taskStartTime = schedule.findNextAvailableSlotWithinBounds(currentWeek.getStartTime(), latestStart, newTask.getEstimatedTime());
-        }
-    
-        if (taskStartTime != null) {
-            TimeBlock timeBlock = new TimeBlock(newTask, taskStartTime, taskStartTime.plus(Duration.ofMinutes((long) (newTask.getEstimatedTime() * 60))));
-            schedule.addTimeBlockManually(timeBlock);
+        if (timeBlock != null) {
             System.out.println("New Task Added: " + timeBlock);
             updateTable(schedule); // Refresh the UI to show the new task
         } else {
@@ -300,11 +285,7 @@ public class GUI extends Application {
             alert.setHeaderText("Unable to Schedule Task");
             alert.showAndWait();
         }
-    }
-    
-    
-    
-    
+    }    
 
     public class HandleEditEvent implements EventHandler<MouseEvent> {
 
