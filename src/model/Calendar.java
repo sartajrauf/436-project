@@ -41,9 +41,8 @@ public class Calendar {
 	}
 	
 	public void addNextWeek() {
-		
-		LocalDateTime newestWeekStart = calendarWeeks.get(calendarWeeks.size() - 1).getStartTime();
-		calendarWeeks.add(new CalendarWeek(newestWeekStart.plusDays(7)));
+		LocalDateTime nextWeekStart = currentWeek.getStartTime().plusDays(7); // Increment by 7 days from the start of the current week
+        calendarWeeks.add(new CalendarWeek(nextWeekStart));
 	}
 	
 	public void removeOldWeek() {

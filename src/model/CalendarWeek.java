@@ -1,5 +1,7 @@
 package model;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,11 +12,11 @@ public class CalendarWeek {
 	private LocalDateTime endTime;
 	private String timeframeString;
 	
-	CalendarWeek(LocalDateTime startTime) {
-		
+	public CalendarWeek(LocalDateTime anyDate) {
+		if (anyDate == null) {anyDate = LocalDateTime.now(); }
+		this.startTime = anyDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        this.endTime = startTime.plusDays(6);
 		this.weekSchedule = new Schedule(startTime, startTime.plusDays(7));
-		this.startTime = startTime;
-		this.endTime = startTime.plusDays(7);
 
 		LocalDateTime beforeEnd = endTime.minusMinutes(1);
 		this.timeframeString = startTime.getMonthValue() + "/" + startTime.getDayOfMonth() + "/" + startTime.getYear() + 
@@ -38,20 +40,22 @@ public class CalendarWeek {
 	}
 	
 	public List<TimeBlock> getTasksByDay(int day) {
-		
-		if (day < 1 || day > 7 ) {
+		if (day < 1 || day > 7) {
 			return null;
 		}
 		
-		List<TimeBlock> retval = new ArrayList<>();
+		LocalDateTime dayStart = startTime.plusDays(day - 1);
+		LocalDateTime dayEnd = dayStart.plusDays(1);
+		
+		List<TimeBlock> tasksForDay = new ArrayList<>();
 		for (TimeBlock timeBlock : weekSchedule.getTimeBlocks()) {
-			if (timeBlock.getStartTime().isAfter(startTime.plusDays(day - 1)) ||
-				timeBlock.getStartTime().isBefore(startTime.plusDays(day))) {
-				retval.add(timeBlock);
+			LocalDateTime taskStart = timeBlock.getStartTime();
+			if (!taskStart.isBefore(dayStart) && taskStart.isBefore(dayEnd)) {
+				tasksForDay.add(timeBlock);
 			}
 		}
-		
-		return retval;
+	
+		return tasksForDay;
 	}
 	
 	// TODO more functions that can manage a schedule on a weekly basis

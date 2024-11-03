@@ -87,15 +87,19 @@ public class Schedule {
     public boolean isBound(TimeBlock timeBlock) {
         return !timeBlock.getStartTime().isBefore(startTime) && !timeBlock.getEndTime().isAfter(endTime);
     }
-    public LocalDateTime findNextAvailableSlot(double estimatedTime) {
-        LocalDateTime candidate = startTime;
-        if (!timeBlocks.isEmpty()) {candidate = timeBlocks.get(timeBlocks.size() - 1).getEndTime();}
-
-        while (candidate.isBefore(endTime)) {
-
+    public LocalDateTime findNextAvailableSlotWithinBounds(LocalDateTime startBound, LocalDateTime endBound, double estimatedTime) {
+        LocalDateTime candidate = startBound;
+        
+        // Iterate through existing time blocks to find a slot within the specified bounds
+        while (!candidate.isAfter(endBound)) {
             LocalDateTime candidateEnd = candidate.plusMinutes((long) (estimatedTime * 60));
+    
+            // Check if the slot is within the bounds and doesn’t conflict with existing time blocks
+            if (candidateEnd.isAfter(endBound)) {
+                return null; // No available slot within bounds
+            }
+    
             boolean conflict = false;
-            
             for (TimeBlock block : timeBlocks) {
                 if (candidate.isBefore(block.getEndTime()) && candidateEnd.isAfter(block.getStartTime())) {
                     conflict = true;
@@ -103,11 +107,19 @@ public class Schedule {
                     break;
                 }
             }
-            if (!conflict && candidateEnd.isBefore(endTime)) {return candidate;}
+    
+            // If no conflict, return this available slot
+            if (!conflict) {
+                return candidate;
+            }
+    
+            // Increment the candidate time by 15 minutes if no available slot was found yet
             candidate = candidate.plusMinutes(15);
         }
-        return null;
+    
+        return null; // No valid slot found within bounds
     }
+    
     private void adjustScheduleBounds(TimeBlock timeBlock) {
         // Adjust startTime and endTime dynamically if the new timeBlock goes beyond current bounds
         if (timeBlock.getStartTime().isBefore(startTime)) {
