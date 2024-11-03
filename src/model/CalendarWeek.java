@@ -16,6 +16,10 @@ public class CalendarWeek {
 		if (anyDate == null) {anyDate = LocalDateTime.now(); }
 		this.startTime = anyDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         this.endTime = startTime.plusDays(6);
+
+		// Debug: Print start and end times for this week
+		System.out.println("Week Start (Expected Monday): " + startTime);
+		System.out.println("Week End (Expected Sunday): " + endTime);
 		this.weekSchedule = new Schedule(startTime, startTime.plusDays(7));
 
 		LocalDateTime beforeEnd = endTime.minusMinutes(1);

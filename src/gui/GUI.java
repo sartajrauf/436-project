@@ -266,39 +266,42 @@ public class GUI extends Application {
         TaskCreationDialog dialog = new TaskCreationDialog();
         Optional<Task> userRet = dialog.showTaskCreationDialog();
         if (userRet.isEmpty()) {
-            // User likely cancelled input
-            return;
+            return; // User canceled the dialog
         }
         Task newTask = userRet.get();
     
-        // Determine the latest possible start time for the task based on the deadline and week end
-        LocalDateTime latestStart = newTask.getDeadline() != null ? 
-            newTask.getDeadline().minus(Duration.ofMinutes((long) (newTask.getEstimatedTime() * 60))) :
-            currentWeek.getEndTime().minus(Duration.ofMinutes((long) (newTask.getEstimatedTime() * 60)));
+        // Determine the latest possible start time for the task
+        LocalDateTime latestStart = newTask.getDeadline() != null
+            ? newTask.getDeadline().minus(Duration.ofMinutes((long) (newTask.getEstimatedTime() * 60)))
+            : currentWeek.getEndTime().minus(Duration.ofMinutes((long) (newTask.getEstimatedTime() * 60)));
     
-        // Ensure latest start time doesn’t extend beyond the week’s end
+        // Ensure latestStart is within the current week's end boundary
         if (latestStart.isAfter(currentWeek.getEndTime())) {
             latestStart = currentWeek.getEndTime().minus(Duration.ofMinutes((long) (newTask.getEstimatedTime() * 60)));
         }
     
-        // Find the next available slot within the week and before the latest start time
-        LocalDateTime taskStartTime = schedule.findNextAvailableSlotWithinBounds(currentWeek.getStartTime(), latestStart, newTask.getEstimatedTime());
+        // Try scheduling the task near the end of the week
+        LocalDateTime taskStartTime = schedule.findNextAvailableSlotWithinBounds(latestStart, currentWeek.getEndTime(), newTask.getEstimatedTime());
+        
+        // If no available slot near the deadline, fall back to the earliest time
         if (taskStartTime == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING, "No available timeslot within the week for this task.", ButtonType.OK);
+            taskStartTime = schedule.findNextAvailableSlotWithinBounds(currentWeek.getStartTime(), latestStart, newTask.getEstimatedTime());
+        }
+    
+        if (taskStartTime != null) {
+            TimeBlock timeBlock = new TimeBlock(newTask, taskStartTime, taskStartTime.plus(Duration.ofMinutes((long) (newTask.getEstimatedTime() * 60))));
+            schedule.addTimeBlockManually(timeBlock);
+            System.out.println("New Task Added: " + timeBlock);
+            updateTable(schedule); // Refresh the UI to show the new task
+        } else {
+            System.out.println("No available slot found for task within the current week.");
+            Alert alert = new Alert(Alert.AlertType.WARNING, "No available slot within the week for this task.", ButtonType.OK);
             alert.setTitle("Scheduling Conflict");
             alert.setHeaderText("Unable to Schedule Task");
             alert.showAndWait();
-            return;
         }
-    
-        // Create and add the TimeBlock
-        TimeBlock timeBlock = new TimeBlock(newTask, taskStartTime,
-                taskStartTime.plus(Duration.ofMinutes((long) (newTask.getEstimatedTime() * 60))));
-        schedule.addTimeBlockManually(timeBlock);
-    
-        System.out.println("New Task Added: " + timeBlock);
-        updateTable(schedule); // Refresh the UI to show the new task
     }
+    
     
     
     
