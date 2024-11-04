@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Calendar {
 
+	private Schedule schedule;
 	private List<CalendarWeek> calendarWeeks;
 	private CalendarWeek currentWeek;
 
@@ -13,6 +14,8 @@ public class Calendar {
 		this.calendarWeeks = new LinkedList<>();
 		this.calendarWeeks.add(new CalendarWeek(startTime));
 		this.currentWeek = calendarWeeks.get(0);
+		schedule = new Schedule();
+        schedule.loadTasksFromFile("tasks.json");
 	}
 
 	public CalendarWeek getCurrentWeek() {

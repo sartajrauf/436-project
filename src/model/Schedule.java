@@ -7,7 +7,10 @@ package model;
  * that is valid. The implementation is not defined as to how it gets scheduled,
  * rather it's about whether it gets scheduled correctly.
  */
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +36,24 @@ public class Schedule {
         this.startTime = startTime;
         this.endTime = endTime;
         this.algorithm = new RandomAlgorithm(); //default for now
+    }
+    public void saveTasksToFile(String filePath) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        try (FileWriter writer = new FileWriter(filePath)) {
+            gson.toJson(timeBlocks, writer);  // Serialize the timeBlocks list to JSON
+            System.out.println("Tasks saved to " + filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void loadTasksFromFile(String filePath) {
+        Gson gson = new Gson();
+        try (FileReader reader = new FileReader(filePath)) {
+            timeBlocks = gson.fromJson(reader, new TypeToken<List<TimeBlock>>() {}.getType());
+            System.out.println("Tasks loaded from " + filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     public void setAlgorithm(Algorithm algorithm){
         this.algorithm = algorithm;

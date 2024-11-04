@@ -237,31 +237,48 @@ public class GUI extends Application {
         }
     }
     }
-
-    private TimeBlock addNewTaskAt(Schedule schedule, LocalDateTime time) {
+    private TimeBlock addNewTaskAt(Schedule schedule, LocalDateTime time) { 
         TaskCreationDialog dialog = new TaskCreationDialog();
         Optional<Task> userRet = dialog.showTaskCreationDialog();
         if (userRet.isEmpty()) {
-            // user likely cancelled input
-            return null;
+            return null; // User likely cancelled input
         }
+    
         Task newTask = userRet.get();
-        TimeBlock timeBlock = new TimeBlock(newTask, time,
+    
+        // Debug: Confirm the time falls within the current week
+        System.out.println("Adding Task at Selected Time: " + time);
+        System.out.println("Current Week Start: " + currentWeek.getStartTime());
+        System.out.println("Current Week End: " + currentWeek.getEndTime());
+    
+        // Constrain the start time to the current week's boundaries
+        if (time.isBefore(currentWeek.getStartTime()) || time.isAfter(currentWeek.getEndTime())) {
+            System.out.println("Selected time is outside of current week. Adjusting to fit within week.");
+            time = currentWeek.getStartTime();  // Adjust time to start of the week for now
+        }
+    
+        // Create the TimeBlock with the constrained start time
+        TimeBlock timeBlock = new TimeBlock(newTask, time, 
                 time.plus(Duration.ofMinutes((long) (newTask.getEstimatedTime() * 60))));
-        // make sure it is valid
+    
+        // Check if the time block is within schedule bounds
         if (schedule.isBound(timeBlock)) {
             schedule.addTimeBlockManually(timeBlock);
+            System.out.println("Task successfully added at: " + timeBlock.getStartTime());
         } else {
-            // prompt the user that it was an invalid timeblock position
-            Alert alert = new Alert(Alert.AlertType.WARNING, "The selected timeslot is not a valid position.",
-                    ButtonType.OK);
+            // Show alert if the time block is out of bounds
+            Alert alert = new Alert(Alert.AlertType.WARNING, "The selected timeslot is not a valid position.", ButtonType.OK);
             alert.setTitle("Invalid Timeslot");
             alert.setHeaderText("Invalid Selection");
             alert.showAndWait();
             return null;
         }
+    
         return timeBlock;
     }
+    
+    
+    
 
     private void addNewTask(Schedule schedule) {
         TaskCreationDialog dialog = new TaskCreationDialog();
