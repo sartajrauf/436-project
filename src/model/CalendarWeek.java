@@ -5,6 +5,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 
+// A week is defined as Mon, Tue, Wed, Thu, Fri, Sat, Sun
 public class CalendarWeek {
 
 	private Schedule weekSchedule;
@@ -43,22 +44,26 @@ public class CalendarWeek {
 		return timeframeString;
 	}
 	
+	// Get all task associated with that day for this week. All objects whose
+	// startTime is inside of the given day will be returned. If no objects
+	// are found then an empty list is returned instead.
 	public List<TimeBlock> getTasksByDay(int day) {
 		if (day < 1 || day > 7) {
-			return null;
+			return new ArrayList<>();
 		}
 		
-		LocalDateTime dayStart = startTime.plusDays(day - 1);
-		LocalDateTime dayEnd = dayStart.plusDays(1);
+		LocalDateTime dayStart = startTime.plusDays(day - 1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+    	LocalDateTime dayEnd = dayStart.plusDays(1);
 		
 		List<TimeBlock> tasksForDay = new ArrayList<>();
+
 		for (TimeBlock timeBlock : weekSchedule.getTimeBlocks()) {
 			LocalDateTime taskStart = timeBlock.getStartTime();
 			if (!taskStart.isBefore(dayStart) && taskStart.isBefore(dayEnd)) {
 				tasksForDay.add(timeBlock);
 			}
 		}
-	
+
 		return tasksForDay;
 	}
 	

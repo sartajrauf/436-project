@@ -15,7 +15,7 @@ REM Create necessary directories
 mkdir ".\lib"
 mkdir ".\.vscode"
 
-echo Downloading 'openjfx-21.0.1'...
+echo Downloading 'openjfx-21.0.1' (this may take a while, give it a minute)...
 
 REM Download the file
 powershell -command "(New-Object System.Net.WebClient).DownloadFile('https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_windows-x64_bin-sdk.zip', 'openjfx-21.0.1_windows-x64_bin-sdk.zip')"
@@ -36,9 +36,9 @@ echo { > ".\.vscode\launch.json"
 echo  "configurations": [ >> ".\.vscode\launch.json"
 echo    { >> ".\.vscode\launch.json"
 echo      "type": "java", >> ".\.vscode\launch.json"
-echo      "name": "Debug (Launch) - Current File", >> ".\.vscode\launch.json"
+echo      "name": "Debug (Launch) - GUI", >> ".\.vscode\launch.json"
 echo      "request": "launch", >> ".\.vscode\launch.json"
-echo      "mainClass": "${file}", >> ".\.vscode\launch.json"
+echo      "mainClass": "${workspaceFolder}/src/gui/GUI.java", >> ".\.vscode\launch.json"
 echo      "vmArgs": "--module-path ./lib/javafx-sdk-21.0.1/lib --add-modules javafx.controls,javafx.media,javafx.fxml" >> ".\.vscode\launch.json"
 echo    } >> ".\.vscode\launch.json"
 echo  ] >> ".\.vscode\launch.json"
@@ -78,4 +78,9 @@ REM Clean up the downloaded zip file
 del openjfx-21.0.1_windows-x64_bin-sdk.zip
 
 echo Done.
+
+echo ============================================================================
+echo To start the project in VSCode press F5 or press the play button (in the top 
+echo right corner).
+
 pause
