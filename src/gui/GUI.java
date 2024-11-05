@@ -58,6 +58,7 @@ public class GUI extends Application {
     public void start(Stage primaryStage) {
 
         // add the title; the title will always be 100px tall
+        calendar.loadWeeksFromFiles();
         titleGrid.setHgap(20);
         titleGrid.add(previousWeekButton, 0, 0);
         title.setFont(new Font(30));
@@ -85,6 +86,7 @@ public class GUI extends Application {
         Scene scene = new Scene(window, 735, 655);
         primaryStage.setScene(scene);
         primaryStage.show();
+        updateTable(currentWeek.getSchedule());
 
         primaryStage.setMinWidth(500);
         primaryStage.setMinHeight(500);
