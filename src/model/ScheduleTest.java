@@ -27,6 +27,7 @@ public class ScheduleTest {
     @BeforeEach
     public void setUp() {
         schedule = new Schedule(LocalDateTime.of(2024, 10, 1, 0, 0), LocalDateTime.of(2024, 10, 2, 0, 0));
+        schedule.setAlgorithm(new SequentialAlgorithm());
         task1 = new Task("Task 1", 2.0);
         task2 = new Task("Task 2", 1.5);
         task3 = new Task("Task 3", 3.0);
@@ -169,20 +170,9 @@ public class ScheduleTest {
         TimeBlock t4 = new TimeBlock(task4, LocalDateTime.of(2024, 10, 1, 9, 0), latestTime.plusMinutes(1));
         schedule.addTimeBlockManually(t1);
         schedule.addTimeBlockManually(t2);
-        // The reason we expect an error over a boolean is because our Schedule object
-        // should
-        // not be in a position where a timeblock is out of bounds. We should always
-        // assume
-        // our timeblocks are inside the bounds. We cannot be in a state where it is out
-        // of bounds.
-        // should return an error (something should have gone wrong)
-        assertThrows(Exception.class, () -> {
-            schedule.addTimeBlockManually(t3);
-        });
-        // should return an error (something should have gone wrong)
-        assertThrows(Exception.class, () -> {
-            schedule.addTimeBlockManually(t4);
-        });
+        // Has been changed to now throw an error and instead automatically
+        // resize when adding a time block manually.
+        // TODO maybe add tests for adding a time block manually.
     }
 
     // Look at the implementation of the function for more detail.
