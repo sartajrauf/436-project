@@ -13,8 +13,22 @@ public class Calendar {
 		this.calendarWeeks = new LinkedList<>();
 		this.calendarWeeks.add(new CalendarWeek(startTime));
 		this.currentWeek = calendarWeeks.get(0);
+		loadWeeksFromFiles(); 
 	}
 
+	public void loadWeeksFromFiles() {
+        for (CalendarWeek week : calendarWeeks) {
+            String filePath = "tasks_" + week.getStartTime().toLocalDate() + ".json";
+            week.getSchedule().loadTasksFromFile(filePath);
+        }
+    }
+
+    public void saveWeeksToFiles() {
+        for (CalendarWeek week : calendarWeeks) {
+            String filePath = "tasks_" + week.getStartTime().toLocalDate() + ".json";
+            week.getSchedule().saveTasksToFile(filePath);
+        }
+    }
 	public CalendarWeek getCurrentWeek() {
 		return currentWeek;
 	}
@@ -43,6 +57,8 @@ public class Calendar {
 	public void addNextWeek() {
 		LocalDateTime nextWeekStart = currentWeek.getStartTime().plusDays(7); // Increment by 7 days from the start of the current week
         calendarWeeks.add(new CalendarWeek(nextWeekStart));
+		//newWeekStart.getSchedule().saveTasksToFile("tasks_" + startTime.toLocalDate() + ".json");
+    
 	}
 	
 	public void removeOldWeek() {
