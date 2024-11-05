@@ -1,10 +1,13 @@
 package model;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 public class RandomAlgorithm implements Algorithm {
+    LocalTime nightStart = LocalTime.of(22, 0);
+    LocalTime nightEnd = LocalTime.of(5, 0);
     int seed = 1;
     @Override
     public TimeBlock applyAlgorithm(Schedule schedule, Task task) {
@@ -21,7 +24,8 @@ public class RandomAlgorithm implements Algorithm {
             LocalDateTime newEndTime = randomStartTime.plusMinutes((long) (task.getEstimatedTime() * 60));
             TimeBlock timeBlock = new TimeBlock(task, randomStartTime, newEndTime);
 
-            if (schedule.canInsertTimeBlock(timeBlock) && !schedule.checkIfIntersectingNight(timeBlock)) {
+            if (schedule.canInsertTimeBlock(timeBlock) &&
+                !schedule.checkIfIntersectingNight(timeBlock, nightEnd, nightStart)) {
                 schedule.getTimeBlocks().add(timeBlock);
                 // No need to shuffle because it has already been done once.
                 // reschedule(schedule);  // Shuffle the tasks randomly after adding

@@ -15,6 +15,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -107,9 +108,33 @@ public class Schedule {
 
         return true;
     }
-    public boolean checkIfIntersectingNight(TimeBlock timeBlock){
-        int startHour = timeBlock.getStartTime().getHour();
-        return startHour < 5 || startHour > 22;
+
+    
+    /*
+     * Check if a timeblock intersects with the night. This means that any part
+     * of the block enters into the night hours given. We assume that 12 AM
+     * is midnight and always signifies a night has passed (and thus it
+     * intersects it). Specify the night start and end times using
+     * `LocalTime.of(5, 0);`
+     */
+    public boolean checkIfIntersectingNight(TimeBlock timeBlock, LocalTime nightEnd, LocalTime nightStart){
+        // check if the days aren't the same
+        // also if the years don't match. Probably excessive tho.
+        if (timeBlock.getStartTime().getDayOfYear() != timeBlock.getEndTime().getDayOfYear() ||
+            timeBlock.getStartTime().getYear() != timeBlock.getEndTime().getYear()) {
+            return true;
+        }
+        // check if the hour is between the night start and end
+        if (timeBlock.getStartTime().toLocalTime().isBefore(nightEnd) ||
+            timeBlock.getEndTime().toLocalTime().isAfter(nightStart)){
+            return true;
+        }
+        // the days are the same and the hours and bound.
+        // It therefore does not intersect the night.
+        return false;
+
+        // int startHour = timeBlock.getStartTime().getHour();
+        // return startHour < 5 || startHour > 22;
     }
     public boolean isBound(TimeBlock timeBlock) {
         return !timeBlock.getStartTime().isBefore(startTime) && !timeBlock.getEndTime().isAfter(endTime);
