@@ -15,8 +15,6 @@ public class RandomAlgorithm implements Algorithm {
         // Can't pick a seed with this one
         // RandomGenerator random = RandomGenerator.of("Random");
         Random random = new Random(seed);
-        System.out.println("New algorithm run with seed: " + seed);
-        System.out.println("New algorithm with first rand val: " + random.nextInt(7 * 24 * 60));
         seed++;
 
         for (int i = 0; i < MAX_ATTEMPTS; i++) {
