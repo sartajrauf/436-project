@@ -9,6 +9,7 @@ package model;
  */
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.FileReader;
@@ -43,32 +44,39 @@ public class Schedule {
     }
     public void saveTasksToFile(String filePath) {
         Gson gson = new GsonBuilder()
-            .registerTypeAdapter(LocalDateTime.class, LocalDateTimeAdapter.serializer)
-            .create();
+                .registerTypeAdapter(LocalDateTime.class, LocalDateTimeAdapter.serializer)
+                .setPrettyPrinting()
+                .create();
         try (FileWriter writer = new FileWriter(filePath)) {
-            gson.toJson(timeBlocks, writer);
+            String json = gson.toJson(timeBlocks);
+            System.out.println("Saving JSON: " + json);  // Log JSON content
+            writer.write(json);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
+    
     public void loadTasksFromFile(String filePath) {
         Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, LocalDateTimeAdapter.deserializer)
             .create();
         try (FileReader reader = new FileReader(filePath)) {
-            timeBlocks = gson.fromJson(reader, new TypeToken<List<TimeBlock>>() {}.getType());
+            List<TimeBlock> loadedBlocks = gson.fromJson(reader, new TypeToken<List<TimeBlock>>() {}.getType());
+
+            // Validate and filter out invalid TimeBlocks
+            timeBlocks = new ArrayList<>();
+            for (TimeBlock block : loadedBlocks) {
+                if (block.getStartTime() != null && block.getEndTime() != null) {
+                    timeBlocks.add(block); // Only add if both times are valid
+                } else {
+                    System.out.println("Invalid TimeBlock loaded: " + block);
+                }
+            }
+            System.out.println("Successfully loaded tasks from: " + filePath);
         } catch (IOException e) {
             System.out.println("No existing file for week: " + filePath);
         }
     }
-    public void setAlgorithm(Algorithm algorithm){
-        this.algorithm = algorithm;
-    }
-    public Algorithm getAlgorithm() {
-        return algorithm;
-    }
-    
 
     public TimeBlock addTask(Task t){
         return algorithm.applyAlgorithm(this,t);
@@ -261,7 +269,16 @@ public class Schedule {
     
     public LocalDateTime findNextAvailableSlot(double estimatedTime) {
         throw new UnsupportedOperationException("Unimplemented method 'findNextAvailableSlot'");
-    }
+        }
+        // Setter for the scheduling algorithm
+        public void setAlgorithm(Algorithm selectedAlgorithm) {
+            this.algorithm = selectedAlgorithm;
+        }
+
+        // Getter for the scheduling algorithm
+        public Algorithm getAlgorithm() {
+            return this.algorithm;
+        }
 
 
 //---------------------------No Longer usefull code if --------------------------------------------//    

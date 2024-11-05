@@ -19,9 +19,10 @@ public class TimeBlock {
     // Constructors
     public TimeBlock(Task task, LocalDateTime startTime, LocalDateTime endTime) {
         this.task = task;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.startTime = startTime != null ? startTime : LocalDateTime.now();
+        this.endTime = endTime != null ? endTime : this.startTime.plusHours(1); // Default to 1-hour duration if endTime is missing
     }
+    
 
     public TimeBlock(Task task, LocalDateTime startTime, Duration duration) {
         this(task, startTime, startTime.plus(duration)); 
@@ -50,8 +51,13 @@ public class TimeBlock {
     }
 
     public Duration getDuration() {
+        if (startTime == null || endTime == null) {
+            //System.out.println("Warning: startTime or endTime is null in TimeBlock: " + this);
+            return Duration.ZERO; // or another sensible default like `Duration.ofHours(1)`
+        }
         return Duration.between(startTime, endTime);
     }
+    
 
     // Setters
     public void setTask(Task task) {
