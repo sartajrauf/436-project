@@ -99,25 +99,41 @@ public class TimeBlockTest {
         TimeBlock blockT = new TimeBlock(task, startTime, duration);
         TimeBlock blockO = new TimeBlock(task, startTime.plusHours(1), duration);
         assertEquals(blockT.intersectsWith(blockO), true);
+        assertEquals(blockO.intersectsWith(blockT), true);
         // test intersect left
         blockT = new TimeBlock(task, startTime, duration);
         blockO = new TimeBlock(task, startTime.plusHours(-1), duration);
         assertEquals(blockT.intersectsWith(blockO), true);
+        assertEquals(blockO.intersectsWith(blockT), true);
         // test intersect inside
         blockT = new TimeBlock(task, startTime.plusHours(1), duration.plusMinutes(-30));
         blockO = new TimeBlock(task, startTime, duration);
         assertEquals(blockT.intersectsWith(blockO), true);
+        assertEquals(blockO.intersectsWith(blockT), true);
         // test intersect outside
         blockT = new TimeBlock(task, startTime, duration);
         blockO = new TimeBlock(task, startTime.plusHours(-1), duration.plusHours(2));
         assertEquals(blockT.intersectsWith(blockO), true);
+        assertEquals(blockO.intersectsWith(blockT), true);
         // test no intersect right (flush)
         blockT = new TimeBlock(task, startTime, duration);
         blockO = new TimeBlock(task, startTime.plusHours(-2), duration);
         assertEquals(blockT.intersectsWith(blockO), false);
+        assertEquals(blockO.intersectsWith(blockT), false);
         // test no intersect left (flush)
         blockT = new TimeBlock(task, startTime, duration);
         blockO = new TimeBlock(task, startTime.plusHours(2), duration);
         assertEquals(blockT.intersectsWith(blockO), false);
+        assertEquals(blockO.intersectsWith(blockT), false);
+        // test intersect (left flush)
+        blockT = new TimeBlock(task, startTime, duration);
+        blockO = new TimeBlock(task, startTime, duration.plusHours(4));
+        assertEquals(blockT.intersectsWith(blockO), true);
+        assertEquals(blockO.intersectsWith(blockT), true);
+        // test intersect (right flush)
+        blockT = new TimeBlock(task, startTime.plusHours(1), Duration.ofMinutes(15));
+        blockO = new TimeBlock(task, startTime, Duration.ofMinutes(75));
+        assertEquals(blockT.intersectsWith(blockO), true);
+        assertEquals(blockO.intersectsWith(blockT), true);
     }
 }

@@ -69,6 +69,7 @@ public class TimeBlock {
     public boolean intersectsWith(TimeBlock otherBlock) {
         if ((this.endTime.isAfter(otherBlock.startTime) && this.startTime.isBefore(otherBlock.endTime)) ||
             (this.startTime.isBefore(otherBlock.endTime) && this.startTime.isAfter(otherBlock.startTime))){
+                // TODO there is a double check. Only one of these is necessary.
                 return true;
         }
         return false;
