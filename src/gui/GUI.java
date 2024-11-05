@@ -130,6 +130,10 @@ public class GUI extends Application {
                 event.consume();
             }
         });
+
+        primaryStage.setOnCloseRequest(event -> {
+            calendar.saveWeeksToFiles();
+        });
         addNewTaskButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {

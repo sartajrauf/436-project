@@ -41,21 +41,24 @@ public class Schedule {
         this.algorithm = new RandomAlgorithm(); //default for now
     }
     public void saveTasksToFile(String filePath) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, LocalDateTimeAdapter.serializer)
+            .create();
         try (FileWriter writer = new FileWriter(filePath)) {
-            gson.toJson(timeBlocks, writer);  // Serialize the timeBlocks list to JSON
-            System.out.println("Tasks saved to " + filePath);
+            gson.toJson(timeBlocks, writer);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     public void loadTasksFromFile(String filePath) {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, LocalDateTimeAdapter.deserializer)
+            .create();
         try (FileReader reader = new FileReader(filePath)) {
             timeBlocks = gson.fromJson(reader, new TypeToken<List<TimeBlock>>() {}.getType());
-            System.out.println("Tasks loaded from " + filePath);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("No existing file for week: " + filePath);
         }
     }
     public void setAlgorithm(Algorithm algorithm){
