@@ -227,6 +227,10 @@ public class Schedule {
         }
         return retval.substring(0, retval.length() - 1);
     }
+    
+    public LocalDateTime findNextAvailableSlot(double estimatedTime) {
+        throw new UnsupportedOperationException("Unimplemented method 'findNextAvailableSlot'");
+    }
 
 
 //---------------------------No Longer usefull code if --------------------------------------------//    

@@ -14,22 +14,21 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import model.Algorithm;
 import model.Calendar;
 import model.CalendarWeek;
 import model.PriorityAlgorithm;
 import model.RandomAlgorithm;
 import model.Schedule;
+import model.Scheduler;
 import model.Task;
 import model.TimeBlock;
-import model.Algorithm;
-import model.Scheduler;
 
 public class GUI extends Application {
 
