@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -173,6 +174,43 @@ public class ScheduleTest {
         // Has been changed to now throw an error and instead automatically
         // resize when adding a time block manually.
         // TODO maybe add tests for adding a time block manually.
+    }
+
+    @Test
+    public void testCheckIfIntersectingNight(){
+        Schedule schedule = new Schedule(LocalDateTime.of(2024, 10, 1, 0, 0), LocalDateTime.of(2024, 10, 3, 0, 0));
+        LocalDateTime earliestTime = LocalDateTime.of(2024, 10, 1, 0, 0);
+        LocalDateTime latestTime = LocalDateTime.of(2024, 10, 3, 0, 0);
+        // use the random algorithm because it checks for night time
+        RandomAlgorithm randAlgorithm = new RandomAlgorithm();
+        schedule.setAlgorithm(randAlgorithm);
+
+        // 10 AM LocalDateTime
+        LocalDateTime tenAM = LocalDateTime.of(earliestTime.toLocalDate(), LocalTime.of(10, 0));
+        LocalDateTime nextDayTenAM = tenAM.plusDays(1);
+        
+        // test if intersecting from 10 AM to the next day at 10 AM
+        TimeBlock longBlock = new TimeBlock(task1, tenAM, nextDayTenAM);
+        boolean result = schedule.checkIfIntersectingNight(longBlock, randAlgorithm.nightEnd, randAlgorithm.nightStart);
+        assertEquals(true, result, "Expected intersection at night 10 AM to the next day at 10 AM");
+
+        // test if intersecting into the late night (2 AM to 10 AM)
+        TimeBlock lateNightBlock = new TimeBlock(task2, tenAM.minusHours(8), tenAM);
+        result = schedule.checkIfIntersectingNight(lateNightBlock, randAlgorithm.nightEnd, randAlgorithm.nightStart);
+        assertEquals(true, result, "Expected intersection at intersecting night into the late night (2 AM to 10 AM)");
+        
+        // test if intersecting into the early night (10 AM to 11 PM)
+        TimeBlock earlyNightBlock = new TimeBlock(task3, tenAM, tenAM.plusHours(13));
+        result = schedule.checkIfIntersectingNight(earlyNightBlock, randAlgorithm.nightEnd, randAlgorithm.nightStart);
+        assertEquals(true, result, "Expected intersection at intersecting night into the early night (10 AM to 11 PM)");
+        
+        // test if a normal time block intersects (10 AM to 1 PM)
+        TimeBlock normalBlock = new TimeBlock(task4, tenAM, tenAM.plusHours(3));
+        result = schedule.checkIfIntersectingNight(normalBlock, randAlgorithm.nightEnd, randAlgorithm.nightStart);
+        assertEquals(false, result, "Expected intersection atintersecting night into the early night 10 AM to 1 PM");
+
+        // TODO maybe test for having be flush against the time?
+
     }
 
     // Look at the implementation of the function for more detail.
