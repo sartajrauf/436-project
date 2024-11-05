@@ -25,6 +25,10 @@ echo Installing 'openjfx-21.0.1'
 REM Extract the contents of the downloaded file
 powershell -command "Expand-Archive -Path '.\openjfx-21.0.1_windows-x64_bin-sdk.zip' -DestinationPath '.\lib'"
 
+REM Download Gson JAR
+echo Downloading 'Gson 2.11.0'...
+powershell -Command "Invoke-WebRequest -Uri 'https://repo1.maven.org/maven2/com/google/code/gson/gson/2.11.0/gson-2.11.0.jar' -OutFile 'lib\gson-2.11.0.jar' -Headers @{ 'User-Agent' = 'Mozilla/5.0' }"
+
 echo Creating .vscode files
 
 REM Create and populate the launch.json file
