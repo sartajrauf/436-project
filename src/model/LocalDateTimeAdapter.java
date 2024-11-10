@@ -1,12 +1,12 @@
 package model;
 
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonSerializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializer;
 
 public class LocalDateTimeAdapter {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;

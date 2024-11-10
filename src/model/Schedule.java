@@ -1,5 +1,13 @@
 package model;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The Schedule contains all the TimeBlocks with our Tasks. The Schedule can
  * manipulate itself to better fit all the TimeBlocks. Thre premise of this
@@ -9,21 +17,7 @@ package model;
  */
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.random.RandomGenerator;
-import java.util.Random;
 /*
 * Schedule contains the TimeBlock and Task as well as a start time and end time
 * of this 
