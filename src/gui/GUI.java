@@ -5,19 +5,23 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import javax.swing.border.TitledBorder;
+
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TitledPane;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import model.Algorithm;
@@ -41,9 +45,12 @@ public class GUI extends Application {
     Label title = new Label(currentWeek.getTimeframeString());
 
     // organization elements
-    GridPane window = new GridPane();
+    BorderPane window = new BorderPane();
     GridPane titleGrid = new GridPane();
     GridPane actionGrid = new GridPane();
+    GridPane actionGridEdit = new GridPane();
+    GridPane actionGridSchedule = new GridPane();
+    GridPane actionGridSave = new GridPane();
     TaskPane taskPane = new TaskPane();
 
     // interactive elements
@@ -52,7 +59,9 @@ public class GUI extends Application {
     private Button addNewTaskButton = new Button("Add New Task");
     private Button rescheduleButton = new Button("Reschedule All");
     private Button loadExampleButton = new Button("Load Example");
-
+    private Button saveButton = new Button("Save Schedule");
+    private Button loadButton = new Button("Load Schedule");
+    private TitledPane actionTitlePane = new TitledPane("Schedule Editing", actionGrid);
 
     @Override
     public void start(Stage primaryStage) {
@@ -64,37 +73,43 @@ public class GUI extends Application {
         title.setFont(new Font(30));
         titleGrid.add(title, 1, 0);
         titleGrid.add(nextWeekButton, 2, 0);
-        window.add(titleGrid, 0, 0);
-        window.add(taskPane, 0, 1);
+        window.setTop(titleGrid);
+        
+        window.setCenter(taskPane);
 
         algorithmComboBox.getItems().addAll(new RandomAlgorithm(), new PriorityAlgorithm());
         algorithmComboBox.getSelectionModel().selectFirst(); // Select the first algorithm by default
 
-        // add the action pane and all element inside it; the action pane will always bu
-        // 200px tall
-        actionGrid.add(addNewTaskButton, 0, 0);
-        actionGrid.add(rescheduleButton, 1, 0);
-        actionGrid.add(loadExampleButton, 2, 0);
-        actionGrid.add(algorithmComboBox, 3, 0);
-        
-        window.add(actionGrid, 0, 2);
+        // add the action pane and all elements inside it; the action pane will always be 100px tall
+        actionGridEdit.add(addNewTaskButton, 0, 0);
+        actionGridEdit.setVgap(20);
+        actionGridEdit.setAlignment(Pos.CENTER);
+        actionGridSchedule.add(rescheduleButton, 0, 0);
+        actionGridSchedule.add(algorithmComboBox, 0, 1);
+        actionGridSchedule.setVgap(20);
+        actionGridSchedule.setAlignment(Pos.CENTER);
+        actionGridSave.add(saveButton, 0, 0);
+        actionGridSave.add(loadButton, 0, 1);
+        actionGridSave.setVgap(20);
+        actionGridSave.setAlignment(Pos.CENTER);
+        actionGrid.add(actionGridEdit, 0, 0);
+        actionGrid.add(actionGridSchedule, 1, 0);
+        actionGrid.add(actionGridSave, 2, 0);
+        actionGrid.setPrefHeight(100);
+        window.setBottom(actionTitlePane);
 
-        // TEMPORARY delete these later
-        primaryStage.setResizable(false);
-        taskPane.setFitToHeight(true);
+        primaryStage.setMinWidth(500);
+        primaryStage.setMinHeight(500);
 
         Scene scene = new Scene(window, 735, 655);
         primaryStage.setScene(scene);
         primaryStage.show();
         updateTable(currentWeek.getSchedule());
 
-        primaryStage.setMinWidth(500);
-        primaryStage.setMinHeight(500);
-
         // set initial sizes for the screen elements and set up listeners so that the
         // sizes dynamically
         // update if the user resizes the screen
-        setElementSizes();
+        setInitialElementSizes();
         primaryStage.widthProperty().addListener((obs, oldVal, newVal) -> {
             setElementSizes();
         });
@@ -144,6 +159,7 @@ public class GUI extends Application {
                 event.consume();
             }
         });
+
         // Add logic for rescheduling tasks
         rescheduleButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
@@ -201,28 +217,10 @@ public class GUI extends Application {
         });
     }
 
-    // sets the dimensions that elements must conform to to fit nicely on the
-    // screen; this function will be
-    // callled automatically every time the user resizes the screen
-    private void setElementSizes() {
-        while (!window.getRowConstraints().isEmpty()) {
-            window.getRowConstraints().remove(0);
-        }
-        while (!window.getColumnConstraints().isEmpty()) {
-            window.getColumnConstraints().remove(0);
-        }
+    // set the dimensions of every element, static or dynamic; will be called once at startup
+    private void setInitialElementSizes() {
 
-        window.getRowConstraints().add(new RowConstraints(50));
-        window.getRowConstraints().add(new RowConstraints(window.getHeight() - 150));
-        window.getRowConstraints().add(new RowConstraints(100));
-        window.getColumnConstraints().add(new ColumnConstraints(window.getWidth()));
-        window.getColumnConstraints().add(new ColumnConstraints(window.getWidth()));
-        window.getColumnConstraints().add(new ColumnConstraints(window.getWidth()));
-
-        while (!titleGrid.getColumnConstraints().isEmpty()) {
-            titleGrid.getColumnConstraints().remove(0);
-        }
-        ColumnConstraints rightAlignButton = new ColumnConstraints((window.getWidth() - 335) / 2);
+        ColumnConstraints rightAlignButton = new ColumnConstraints((window.getWidth() - 375) / 2);
         rightAlignButton.setHalignment(HPos.RIGHT);
         titleGrid.getColumnConstraints().add(rightAlignButton);
         ColumnConstraints centerAlignLabel = new ColumnConstraints(335);
@@ -231,6 +229,22 @@ public class GUI extends Application {
         ColumnConstraints leftAlignButton = new ColumnConstraints((window.getWidth() - 335) / 2);
         leftAlignButton.setHalignment(HPos.LEFT);
         titleGrid.getColumnConstraints().add(leftAlignButton);
+
+        ColumnConstraints cc = new ColumnConstraints();
+        cc.setPercentWidth(33.33);
+        actionGrid.getColumnConstraints().addAll(cc, cc, cc);
+    }    
+
+    // sets the dimensions that dynamic elements must conform to to fit nicely on the screen; this function
+    // will be called automatically every time the user resizes the screen
+    private void setElementSizes() {
+
+        ColumnConstraints rightAlignButton = new ColumnConstraints((window.getWidth() - 375) / 2);
+        rightAlignButton.setHalignment(HPos.RIGHT);
+        titleGrid.getColumnConstraints().set(0, rightAlignButton);
+        ColumnConstraints leftAlignButton = new ColumnConstraints((window.getWidth() - 335) / 2);
+        leftAlignButton.setHalignment(HPos.LEFT);
+        titleGrid.getColumnConstraints().set(2, leftAlignButton);
     }
 
     private void updateTable(Schedule schedule) {
@@ -241,6 +255,7 @@ public class GUI extends Application {
             taskPane.addTimeBlock(timeBlock, new HandleEditEvent(timeBlock));
         }
     }
+
     }
     private TimeBlock addNewTaskAt(Schedule schedule, LocalDateTime time) { 
         TaskCreationDialog dialog = new TaskCreationDialog();
@@ -282,9 +297,6 @@ public class GUI extends Application {
         return timeBlock;
     }
     
-    
-    
-
     private void addNewTask(Schedule schedule) {
         TaskCreationDialog dialog = new TaskCreationDialog();
         Optional<Task> userRet = dialog.showTaskCreationDialog();
