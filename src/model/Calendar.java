@@ -23,9 +23,9 @@ public class Calendar {
         }
     }
 
-    public void saveWeeksToFiles() {
+    public void saveWeeksToFiles(String filename) {
         for (CalendarWeek week : calendarWeeks) {
-            String filePath = "savedSchedules\\tasks_" + week.getStartTime().toLocalDate() + ".json";
+            String filePath = "savedSchedules\\" + filename + ".json";
             week.getSchedule().saveTasksToFile(filePath);
         }
     }

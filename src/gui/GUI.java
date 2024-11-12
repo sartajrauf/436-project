@@ -34,6 +34,9 @@ import model.TimeBlock;
 
 public class GUI extends Application {
 
+    // name of currently loaded file, could be null if nothing is loaded
+    String loadedFileName = null;
+
     // backing structures
     Calendar calendar = new Calendar(LocalDateTime.now());
     CalendarWeek currentWeek = calendar.getCurrentWeek();
@@ -58,6 +61,7 @@ public class GUI extends Application {
     private Button rescheduleButton = new Button("Reschedule All");
     private Button loadExampleButton = new Button("Load Example");
     private Button saveButton = new Button("Save Schedule");
+    private Button saveAsButton = new Button("Save Schedule As");
     private Button loadButton = new Button("Load Schedule");
     private TitledPane actionTitlePane = new TitledPane("Schedule Editing", actionGrid);
 
@@ -87,7 +91,8 @@ public class GUI extends Application {
         actionGridSchedule.setVgap(20);
         actionGridSchedule.setAlignment(Pos.CENTER);
         actionGridSave.add(saveButton, 0, 0);
-        actionGridSave.add(loadButton, 0, 1);
+        actionGridSave.add(saveAsButton, 0, 1);
+        actionGridSave.add(loadButton, 0, 2);
         actionGridSave.setVgap(20);
         actionGridSave.setAlignment(Pos.CENTER);
         actionGrid.add(actionGridEdit, 0, 0);
@@ -195,7 +200,19 @@ public class GUI extends Application {
         saveButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
+                if (loadedFileName != null) {
+                    saveSchedule(loadedFileName);
+                }
+                else {
+                    saveSchedule(null);
+                }
+            }
+        });
 
+        saveAsButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                saveSchedule(null);
             }
         });
         
@@ -225,10 +242,6 @@ public class GUI extends Application {
                 }
                 eMouseEvent.consume();
             }
-        });
-
-        primaryStage.setOnCloseRequest(event -> {
-            calendar.saveWeeksToFiles();
         });
     }
 
@@ -336,9 +349,25 @@ public class GUI extends Application {
         }
     }    
 
+    private void saveSchedule(String filename) {
+        
+        // if we weren't given a filename to save to, ask the user for one
+        if (filename == null) {
+            ScheduleSaveDialog dialog = new ScheduleSaveDialog();
+            filename = dialog.showScheduleSaveDialog();    
+        }
+
+        // the filename could still be null if the user pressed cancel when
+        // prompted to provide a name
+        if (filename != null) {
+            calendar.saveWeeksToFiles(filename);
+            loadedFileName = filename;
+        }
+    }
+
     private void loadSchedule() {
         ScheduleLoadDialog dialog = new ScheduleLoadDialog();
-        Optional<String> userRet = dialog.showTaskCreationDialog();
+        Optional<String> userRet = dialog.showScheduleLoadDialog();
 
         if (userRet.isPresent()) {
 

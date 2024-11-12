@@ -10,7 +10,7 @@ import javafx.scene.control.ChoiceDialog;
 
 public class ScheduleLoadDialog {
 
-    public Optional<String> showTaskCreationDialog() {
+    public Optional<String> showScheduleLoadDialog() {
 
         // get the filenames in the saved folder
         File[] files = new File("savedSchedules\\").listFiles();
