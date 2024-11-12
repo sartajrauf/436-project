@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import javax.swing.border.TitledBorder;
-
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -136,6 +134,7 @@ public class GUI extends Application {
                 event.consume();
             }
         });
+
         nextWeekButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
 
             @Override
@@ -148,9 +147,6 @@ public class GUI extends Application {
             }
         });
 
-        primaryStage.setOnCloseRequest(event -> {
-            calendar.saveWeeksToFiles();
-        });
         addNewTaskButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -176,6 +172,7 @@ public class GUI extends Application {
                 event.consume();
             }
         });
+
         loadExampleButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -185,6 +182,20 @@ public class GUI extends Application {
                 // taskPane.refresh(this, currentWeek.getSchedule());
                 updateTable(currentWeek.getSchedule());
                 event.consume();
+            }
+        });
+
+        loadButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                loadSchedule();
+            }
+        });
+
+        saveButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+
             }
         });
         
@@ -214,6 +225,10 @@ public class GUI extends Application {
                 }
                 eMouseEvent.consume();
             }
+        });
+
+        primaryStage.setOnCloseRequest(event -> {
+            calendar.saveWeeksToFiles();
         });
     }
 
@@ -320,6 +335,19 @@ public class GUI extends Application {
             alert.showAndWait();
         }
     }    
+
+    private void loadSchedule() {
+        ScheduleLoadDialog dialog = new ScheduleLoadDialog();
+        Optional<String> userRet = dialog.showTaskCreationDialog();
+
+        if (userRet.isPresent()) {
+
+            String filename = userRet.get() + ".json";
+            System.out.println("File name to load: " + filename);
+
+            // TODO use the filename to open a load a new schedule
+        }
+    }
 
     public class HandleEditEvent implements EventHandler<MouseEvent> {
 
