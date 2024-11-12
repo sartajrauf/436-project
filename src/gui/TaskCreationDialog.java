@@ -2,6 +2,7 @@ package gui;
 
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.geometry.Pos;
 import model.Task;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
@@ -10,126 +11,107 @@ import java.util.Optional;
 public class TaskCreationDialog {
 
     public Optional<Task> showTaskCreationDialog() {
-        // Step 1: Create dialog to get task name
-        TextInputDialog taskNameDialog = new TextInputDialog();
-        taskNameDialog.setTitle("Add New Task");
-        taskNameDialog.setHeaderText("Enter Task Name:");
-        taskNameDialog.setContentText("Task Name:");
+        // Step 1: Create a Dialog to gather all task information
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Add New Task");
 
-        Optional<String> taskNameResult = taskNameDialog.showAndWait();
-        if (!taskNameResult.isPresent()) {
-            return Optional.empty(); // User cancelled input
-        }
-        String taskName = taskNameResult.get().trim();
+        // Create the OK button and add it to the dialog
+        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
-        if (taskName.isEmpty()) {
-            showAlert("Invalid Input", "Task name cannot be empty.");
-            return Optional.empty();
-        }
+        // Create a GridPane for arranging the fields
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setAlignment(Pos.CENTER);
 
-        // Step 2: Create dialog to get estimated time
-        TextInputDialog taskTimeDialog = new TextInputDialog();
-        taskTimeDialog.setTitle("Add New Task");
-        taskTimeDialog.setHeaderText("Enter Estimated Time (hours):");
-        taskTimeDialog.setContentText("Estimated Time:");
+        // 1. Task Name input
+        TextField taskNameField = new TextField();
+        taskNameField.setPromptText("Enter task name");
+        grid.add(new Label("Task Name:"), 0, 0);
+        grid.add(taskNameField, 1, 0);
 
-        Optional<String> taskTimeResult = taskTimeDialog.showAndWait();
-        if (!taskTimeResult.isPresent()) {
-            return Optional.empty(); // User cancelled input
-        }
-        String taskTimeInput = taskTimeResult.get().trim();
+        // 2. Estimated Time input (in hours)
+        TextField estimatedTimeField = new TextField();
+        estimatedTimeField.setPromptText("Estimated Time in hours");
+        grid.add(new Label("Estimated Time:"), 0, 1);
+        grid.add(estimatedTimeField, 1, 1);
 
-        double estimatedTime;
-        try {
-            estimatedTime = Double.parseDouble(taskTimeInput);
-            if (estimatedTime <= 0) {
-                showAlert("Invalid Input", "Estimated time must be a positive number.");
-                return Optional.empty();
-            }
-        } catch (NumberFormatException e) {
-            showAlert("Invalid Input", "Please enter a valid number for the estimated time.");
-            return Optional.empty();
-        }
+        // 3. Priority input (1 to 10)
+        TextField priorityField = new TextField();
+        priorityField.setPromptText("Priority (1-10)");
+        grid.add(new Label("Priority:"), 0, 2);
+        grid.add(priorityField, 1, 2);
 
-        //Step 3: Set the priority of the tast
-        //TODO: Create tests for this
-        TextInputDialog prio =  new TextInputDialog();
-        prio.setTitle("Task Priority");
-        prio.setHeaderText("Enter the priority of the task (1-10). 1 having the highest priority.");
-        prio.setContentText("Priority:");
-
-        Optional<String> prioResult = prio.showAndWait();
-
-        if (!prioResult.isPresent()) {
-            return Optional.empty(); // User cancelled input
-        }
-        
-        String prioInput = prioResult.get().trim();
-
-        int p = 1;
-        if(!prioInput.isEmpty()){
-            try {
-                p = Integer.parseInt(prioInput);
-                if (p <= 0 || p >=11) {
-                    showAlert("Invalid Input", "Priority should be between 1-10 inclusively.");
-                    return Optional.empty();
-                }
-            } catch (NumberFormatException e) {
-                showAlert("Invalid Input", "Please enter a valid number for the Priority.");
-                return Optional.empty();
-            }
-        }
-
-        // Step 4: Create the task 
-        Task newTask = new Task(taskName, estimatedTime);
-        newTask.setPriority(p);
-
-        // Step 5: Create dialog to get deadline date and time
-        DatePicker deadlinePicker = new DatePicker();
-        deadlinePicker.setPromptText("Select Deadline Date");
-
+        // 4. Deadline input (DatePicker and Hour Picker)
+        DatePicker deadlineDatePicker = new DatePicker();
+        deadlineDatePicker.setPromptText("Select Deadline Date");
         ComboBox<Integer> hourPicker = new ComboBox<>();
         for (int i = 0; i < 24; i++) {
             hourPicker.getItems().add(i); // Adding hours from 0 to 23
         }
         hourPicker.setPromptText("Select Hour");
+        
+        grid.add(new Label("Deadline Date:"), 0, 3);
+        grid.add(deadlineDatePicker, 1, 3);
+        grid.add(new Label("Deadline Hour:"), 0, 4);
+        grid.add(hourPicker, 1, 4);
 
-        Dialog<ButtonType> deadlineDialog = new Dialog<>();
-        deadlineDialog.setTitle("Add New Task");
-        deadlineDialog.setHeaderText("Select Deadline Date and Time. Format: 10/23/2024, 15:12");
+        dialog.getDialogPane().setContent(grid);
 
-        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        deadlineDialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
-
-        GridPane grid = new GridPane();
-        grid.add(new Label("Deadline Date:"), 0, 0);
-        grid.add(deadlinePicker, 1, 0);
-        grid.add(new Label("Deadline Hour:"), 0, 1);
-        grid.add(hourPicker, 1, 1);
-        deadlineDialog.getDialogPane().setContent(grid);
-
-        Optional<ButtonType> result = deadlineDialog.showAndWait();
+        // Show the dialog and wait for the user's response
+        Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get() == okButtonType) {
-            LocalDate deadlineDate = deadlinePicker.getValue();
+            // Step 2: Handle the input
+            String taskName = taskNameField.getText().trim();
+            if (taskName.isEmpty()) {
+                showAlert("Invalid Input", "Task name cannot be empty.");
+                return Optional.empty();
+            }
+
+            double estimatedTime = 0;
+            try {
+                estimatedTime = Double.parseDouble(estimatedTimeField.getText().trim());
+                if (estimatedTime <= 0) {
+                    showAlert("Invalid Input", "Estimated time must be a positive number.");
+                    return Optional.empty();
+                }
+            } catch (NumberFormatException e) {
+                showAlert("Invalid Input", "Please enter a valid number for the estimated time.");
+                return Optional.empty();
+            }
+
+            int priority = 1;
+            try {
+                priority = Integer.parseInt(priorityField.getText().trim());
+                if (priority <= 0 || priority > 10) {
+                    showAlert("Invalid Input", "Priority should be between 1-10.");
+                    return Optional.empty();
+                }
+            } catch (NumberFormatException e) {
+                showAlert("Invalid Input", "Please enter a valid number for the priority.");
+                return Optional.empty();
+            }
+
+            LocalDate deadlineDate = deadlineDatePicker.getValue();
             Integer deadlineHour = hourPicker.getValue();
-
-            if (deadlineHour == null) {
-                deadlineHour = 0;
+            if (deadlineDate == null || deadlineHour == null) {
+                showAlert("Invalid Input", "Please select a valid deadline date and time.");
+                return Optional.empty();
             }
 
-            LocalDateTime deadline = null;
-            if (deadlineDate != null) {
-                // Combine date and hour into a LocalDateTime
-                deadline = deadlineDate.atStartOfDay().plusHours(deadlineHour);
-            }
+            // Combine date and hour into a LocalDateTime
+            LocalDateTime deadline = deadlineDate.atStartOfDay().plusHours(deadlineHour);
 
+            // Create the task with the gathered data
+            Task newTask = new Task(taskName, estimatedTime);
+            newTask.setPriority(priority);
             newTask.setDeadline(deadline);
-            
-        } else {
-            return Optional.empty(); // User cancelled or closed the dialog
+
+            return Optional.of(newTask); // Return the newly created task
         }
 
-        return Optional.of(newTask);
+        return Optional.empty(); // User cancelled or closed the dialog
     }
 
     private void showAlert(String title, String content) {

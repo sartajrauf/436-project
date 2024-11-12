@@ -13,18 +13,20 @@ public class Task {
     private double estimatedTime;
     private Integer priority;
     private LocalDateTime deadline;
+    private boolean fixed;
 
     // Constructor
-    public Task(String description,Integer priority, double estimatedTime, LocalDateTime deadline) {
+    public Task(String description,Integer priority, double estimatedTime, LocalDateTime deadline, boolean fixed) {
         this.description = description;
         this.priority = priority;
         this.estimatedTime = estimatedTime;
         this.deadline = (deadline == null) ? LocalDateTime.now().plusWeeks(1) : deadline;
+        this.fixed = fixed;
     }
 
-    public Task(String name, double estimate){this(name, 5, estimate, null);}
+    public Task(String name, double estimate){this(name, 5, estimate, null, false);}
 
-    public Task(String description, Integer priority) {this(description, priority, 0.0, null);}
+    public Task(String description, Integer priority) {this(description, priority, 0.0, null, false);}
 
     public boolean isFullyInitialized() {return description != null && priority != null;}
 
