@@ -16,6 +16,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
@@ -178,9 +179,8 @@ public class GUI extends Application {
             }
         });
 
-        loadExampleButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.F9) {
                 // remove all other elements for demonstration purposes.
                 currentWeek.getSchedule().removeAll();
                 ExampleSchedules.manuallyAddTimeBlocks(currentWeek.getSchedule());
