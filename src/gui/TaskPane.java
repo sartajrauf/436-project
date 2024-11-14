@@ -38,48 +38,36 @@ public class TaskPane extends ScrollPane {
 
     BorderPane borderPane;
     Pane container;
-    private GridPane gridPane;
     private GridPane hoursNames = new GridPane();
     private GridPane dayNames = new GridPane();
     private ArrayList<Label> dayLabels = new ArrayList<>();
     private ArrayList<Label> hourLabels = new ArrayList<>();
 
     public TaskPane() {
-        gridPane = new GridPane();
         this.setFitToWidth(true); // Ensure it fits the width
 
-        String[] days = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+        setupLabels();
 
-        // Update total_height when the height changes
-        this.heightProperty().addListener((observable, oldHeight, newHeight) -> {
-            this.total_height = newHeight.intValue() - 20;
-            this.hour_height = this.total_height / HOURS_IN_DAY;
-            container.setPrefHeight(total_height);
-            hourLabels.forEach(label -> {
-                // Calculate height for each hour label
-                double hourLabelHeight = (double) total_height / HOURS_IN_DAY;
-                label.setMinHeight(hourLabelHeight - 1);
-                label.setMaxHeight(hourLabelHeight - 1);
-                label.setFont(new Font(Math.max(hour_height - 4, 1)));
-            });
-            refresh();
-        });
-        this.widthProperty().addListener((observable, oldWidth, newWidth) -> {
-            this.total_width = newWidth.intValue() - 50; // It just won't align
-            this.day_width = this.total_width / 7;
-            container.setPrefWidth(total_width);
-            dayLabels.forEach(label -> {
-                // Calculate height for each hour label
-                label.setMinWidth(day_width);
-                label.setMaxWidth(day_width);
-                label.setPadding(new Insets(0, 0, 0, day_width / 2));
-            });
-            // borderPane.setPrefWidth(total_height + 100);
-            // borderPane.setPadding(new Insets(0, 50, 50, 0));
-            // container.setPrefWidth(total_height + 100);
-            // this.setPrefWidth(total_height + 100);
-            refresh();
-        });
+        // Create a container pane for the GridPane and time blocks
+        borderPane = new BorderPane();
+        container = new Pane();
+        borderPane.setTop(dayNames);
+        borderPane.setLeft(hoursNames);
+        borderPane.setCenter(container);
+        container.setPrefHeight(total_height); // Set the preferred height for the container
+        // container.setPrefHeight(DAY_WIDTH*7);
+        container.setStyle("-fx-background-color: lightgray;");
+
+        setupResizeEventListeners();
+
+        // Draw gridlines
+        drawGridLines();
+
+        this.setContent(borderPane);
+    }
+
+    private void setupLabels() {
+        String[] days = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
 
         // Calculate height for each hour label
         double hourLabelHeight = (double) total_height / HOURS_IN_DAY;
@@ -106,24 +94,44 @@ public class TaskPane extends ScrollPane {
             hoursNames.add(hourLabel, 0, i + 1);
             hourLabels.add(hourLabel);
         }
+    }
 
-        // Set the height of the GridPane to match the desired height
-        // gridPane.setPrefHeight(total_height);
-
-        // Create a container pane for the GridPane and time blocks
-        borderPane = new BorderPane(gridPane); // Create a new pane containing the grid
-        container = new Pane();
-        borderPane.setTop(dayNames);
-        borderPane.setLeft(hoursNames);
-        borderPane.setCenter(container);
-        container.setPrefHeight(total_height); // Set the preferred height for the container
-        // container.setPrefHeight(DAY_WIDTH*7);
-        container.setStyle("-fx-background-color: lightgray;");
-
-        // Draw gridlines
-        drawGridLines();
-
-        this.setContent(borderPane);
+    private void setupResizeEventListeners() {
+        // Update total_height when the height changes
+        this.heightProperty().addListener((observable, oldHeight, newHeight) -> {
+            this.total_height = newHeight.intValue() - 20;
+            this.hour_height = this.total_height / HOURS_IN_DAY;
+            container.setPrefHeight(total_height);
+            hourLabels.forEach(label -> {
+                // Calculate height for each hour label
+                double hourLabelHeightt = (double) total_height / HOURS_IN_DAY;
+                label.setMinHeight(hourLabelHeightt - 1);
+                label.setMaxHeight(hourLabelHeightt - 1);
+                label.setFont(new Font(Math.max(hour_height - 4, 1)));
+            });
+            refresh();
+        });
+        this.widthProperty().addListener((observable, oldWidth, newWidth) -> {
+            // It just won't align
+            // it's bugged or something (javafx is).
+            // It's good enough. TODO when refining this may need to be fixed
+            this.total_width = newWidth.intValue() - (int)container.localToScene(0, 0).getX();
+            this.day_width = this.total_width / 7;
+            container.setPrefWidth(total_width);
+            dayLabels.forEach(label -> {
+                // Calculate height for each hour label
+                label.setMinWidth(day_width);
+                label.setMaxWidth(day_width);
+                label.setPadding(new Insets(0, 0, 0, day_width / 2));
+            });
+            // System.out.println();
+            // System.out.println("Offset Width: " + (int)container.localToScene(0, 0).getX());
+            // System.out.println("Window Width: " + newWidth.intValue());
+            // System.out.println("Container Width: " + this.total_width);
+            // System.out.println("Day Width: " + this.day_width);
+            // System.out.println("Border Width: " + borderPane.widthProperty().intValue());
+            refresh();
+        });
     }
 
     public void setActionOnScheduleClick(EventHandler<MouseEvent> eventHandler) {
