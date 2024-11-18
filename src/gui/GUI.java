@@ -2,10 +2,16 @@ package gui;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
@@ -44,6 +50,7 @@ public class GUI extends Application {
     ComboBox<Algorithm> algorithmComboBox = new ComboBox<>();
 
     // decorative elements
+    Label currentTimeLabel = new Label();
     Label title = new Label(currentWeek.getTimeframeString());
 
     // organization elements
@@ -72,10 +79,12 @@ public class GUI extends Application {
         // add the title; the title will always be 100px tall
         // calendar.loadWeeksFromFiles();
         titleGrid.setHgap(20);
-        titleGrid.add(previousWeekButton, 0, 0);
+        currentTimeLabel.setFont(new Font(30));
+        titleGrid.add(currentTimeLabel, 1, 0);
+        titleGrid.add(previousWeekButton, 0, 1);
         title.setFont(new Font(30));
-        titleGrid.add(title, 1, 0);
-        titleGrid.add(nextWeekButton, 2, 0);
+        titleGrid.add(title, 1, 1);
+        titleGrid.add(nextWeekButton, 2, 1);
         window.setTop(titleGrid);
         
         window.setCenter(taskPane);
@@ -123,6 +132,8 @@ public class GUI extends Application {
         setupResizeHandlers(primaryStage);
 
         setupPlacementHandler();
+        
+        setupCurrentTimeHandler();
 
         scene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.F9) {
@@ -134,6 +145,20 @@ public class GUI extends Application {
                 event.consume();
             }
         });
+    }
+
+    private void setupCurrentTimeHandler() {
+        // TODO: temp. It's just me copy pasting. I have 0 clue what any of this does
+        // it works well enough as a demo. If we want to keep it I can maybe rewrite
+        // this using my own knowledge instead 
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm:ss a");
+
+        // Schedule task to update label every second
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> {
+            String currentTime = LocalTime.now().format(timeFormatter);
+            Platform.runLater(() -> currentTimeLabel.setText(currentTime)); // Update on the JavaFX Application Thread
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
     private void setupPlacementHandler() {
