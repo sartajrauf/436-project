@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
@@ -179,6 +180,10 @@ public class TaskPane extends ScrollPane {
         }
 
         BorderPane timeBlockPane = new BorderPane(); // Use BorderPane for layout
+
+        // make it look more clickable for the user (is this for CSS to implement?)
+        timeBlockPane.setOnMouseEntered(event -> timeBlockPane.setCursor(Cursor.HAND));
+        timeBlockPane.setOnMouseExited(event -> timeBlockPane.setCursor(Cursor.DEFAULT));
 
         drawTimeBlock(timeBlockPane, timeBlock);
 
