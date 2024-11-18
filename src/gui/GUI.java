@@ -114,6 +114,59 @@ public class GUI extends Application {
         // sizes dynamically
         // update if the user resizes the screen
         setInitialElementSizes();
+        setupEvents(primaryStage, scene);
+    }
+
+    private void setupEvents(Stage primaryStage, Scene scene) {
+        setupButtonHandlers();
+
+        setupResizeHandlers(primaryStage);
+
+        setupPlacementHandler();
+
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.F9) {
+                // remove all other elements for demonstration purposes.
+                currentWeek.getSchedule().removeAll();
+                ExampleSchedules.manuallyAddTimeBlocks(currentWeek.getSchedule());
+                // taskPane.refresh(this, currentWeek.getSchedule());
+                updateTable(currentWeek.getSchedule());
+                event.consume();
+            }
+        });
+    }
+
+    private void setupPlacementHandler() {
+        taskPane.setActionOnScheduleClick(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent eMouseEvent) {
+                double x = eMouseEvent.getX();
+                double y = eMouseEvent.getY();
+
+                // figure out what day column it is.
+                int dayCol = (int)(x/TaskPane.DAY_WIDTH);
+
+                // figure out what hour row it is.
+                int hourRow = (int)(y/TaskPane.HOUR_HEIGHT);
+
+                // if it's out of bounds then ignore it
+                if (dayCol < 0 || dayCol > 6 || hourRow < 0 || hourRow > 23){
+                    eMouseEvent.consume();
+                    return;
+                }
+
+                // begin task placement at that location down to the hour.
+                LocalDateTime newTime = currentWeek.getStartTime().plus(Duration.ofDays(dayCol).plus(Duration.ofHours(hourRow)));
+                TimeBlock timeBlock = addNewTaskAt(currentWeek.getSchedule(), newTime);
+                if (timeBlock != null){
+                    taskPane.addTimeBlock(timeBlock, new HandleEditEvent(timeBlock));
+                }
+                eMouseEvent.consume();
+            }
+        });
+    }
+
+    private void setupResizeHandlers(Stage primaryStage) {
         primaryStage.widthProperty().addListener((obs, oldVal, newVal) -> {
             setElementSizes();
         });
@@ -124,7 +177,9 @@ public class GUI extends Application {
             // this isn't working for some reason, will figure it out later
             setElementSizes();
         });
+    }
 
+    private void setupButtonHandlers() {
         algorithmComboBox.setOnAction(event -> {
             Algorithm selectedAlgorithm = algorithmComboBox.getSelectionModel().getSelectedItem();
             currentWeek.getSchedule().setAlgorithm(selectedAlgorithm);
@@ -179,17 +234,6 @@ public class GUI extends Application {
             }
         });
 
-        scene.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.F9) {
-                // remove all other elements for demonstration purposes.
-                currentWeek.getSchedule().removeAll();
-                ExampleSchedules.manuallyAddTimeBlocks(currentWeek.getSchedule());
-                // taskPane.refresh(this, currentWeek.getSchedule());
-                updateTable(currentWeek.getSchedule());
-                event.consume();
-            }
-        });
-
         loadButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -213,34 +257,6 @@ public class GUI extends Application {
             @Override
             public void handle(MouseEvent event) {
                 saveSchedule(null);
-            }
-        });
-        
-        taskPane.setActionOnScheduleClick(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent eMouseEvent) {
-                double x = eMouseEvent.getX();
-                double y = eMouseEvent.getY();
-
-                // figure out what day column it is.
-                int dayCol = (int)(x/TaskPane.DAY_WIDTH);
-
-                // figure out what hour row it is.
-                int hourRow = (int)(y/TaskPane.HOUR_HEIGHT);
-
-                // if it's out of bounds then ignore it
-                if (dayCol < 0 || dayCol > 6 || hourRow < 0 || hourRow > 23){
-                    eMouseEvent.consume();
-                    return;
-                }
-
-                // begin task placement at that location down to the hour.
-                LocalDateTime newTime = currentWeek.getStartTime().plus(Duration.ofDays(dayCol).plus(Duration.ofHours(hourRow)));
-                TimeBlock timeBlock = addNewTaskAt(currentWeek.getSchedule(), newTime);
-                if (timeBlock != null){
-                    taskPane.addTimeBlock(timeBlock, new HandleEditEvent(timeBlock));
-                }
-                eMouseEvent.consume();
             }
         });
     }
