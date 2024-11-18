@@ -70,7 +70,7 @@ public class GUI extends Application {
     public void start(Stage primaryStage) {
 
         // add the title; the title will always be 100px tall
-        calendar.loadWeeksFromFiles();
+        // calendar.loadWeeksFromFiles();
         titleGrid.setHgap(20);
         titleGrid.add(previousWeekButton, 0, 0);
         title.setFont(new Font(30));
@@ -372,9 +372,12 @@ public class GUI extends Application {
         if (userRet.isPresent()) {
 
             String filename = userRet.get() + ".json";
-            System.out.println("File name to load: " + filename);
+            // System.out.println("File name to load: " + filename);
 
             // TODO use the filename to open a load a new schedule
+            calendar.loadWeeksFromFile(filename);
+            // must refresh view and update any contents in pane.
+            taskPane.refresh(this, calendar.getCurrentWeek().getSchedule());
         }
     }
 

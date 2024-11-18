@@ -1,5 +1,7 @@
 package model;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,9 +15,38 @@ public class Calendar {
 		this.calendarWeeks = new LinkedList<>();
 		this.calendarWeeks.add(new CalendarWeek(startTime));
 		this.currentWeek = calendarWeeks.get(0);
-		loadWeeksFromFiles(); 
+		// loadWeeksFromFiles();
 	}
 
+	public void loadWeeksFromFile(String filename) {
+		// find the correct week.
+		String filePath = "savedSchedules/" + filename;
+		// TODO: lazy temp handling of loading files
+		try {
+			CalendarWeek week = getWeekFromDate(filename.split("_")[1]);
+			week.getSchedule().loadTasksFromFile(filePath);
+		} catch (Exception e) {
+			System.out.println(e);
+			System.out.println("Could not load week from file because file was invalid!");
+		}
+		// do nothing (do not load anything)
+	}
+
+	private CalendarWeek getWeekFromDate(String dateString) {
+		LocalDate date = LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE);
+		// check if the week already exists.
+		for (CalendarWeek week : calendarWeeks) {
+			if (week.getStartTime().toLocalDate().equals(date)) {
+				return week;
+			}
+		}
+		// doesn't exist. Make a new object
+		CalendarWeek newCalendarWeek = new CalendarWeek(date.atStartOfDay());
+		calendarWeeks.add(newCalendarWeek);
+		return newCalendarWeek;
+	}
+		
+			// unsure how to use the function (Ivan)
 	public void loadWeeksFromFiles() {
         for (CalendarWeek week : calendarWeeks) {
             String filePath = "tasks_" + week.getStartTime().toLocalDate() + ".json";
@@ -25,7 +56,9 @@ public class Calendar {
 
     public void saveWeeksToFiles(String filename) {
         for (CalendarWeek week : calendarWeeks) {
-            String filePath = "savedSchedules\\" + filename + ".json";
+            String filePath = "savedSchedules/tasks_"
+				+ week.getStartTime().toLocalDate() + "_"
+				+ filename + ".json";
             week.getSchedule().saveTasksToFile(filePath);
         }
     }
