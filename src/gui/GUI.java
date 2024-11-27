@@ -27,6 +27,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -49,6 +51,7 @@ public class GUI extends Application {
     Calendar calendar = new Calendar(LocalDateTime.now());
     CalendarWeek currentWeek = calendar.getCurrentWeek();
     ComboBox<Algorithm> algorithmComboBox = new ComboBox<>();
+    SettingsPane settingsPane = new SettingsPane();
 
     // decorative elements
     Label currentTimeLabel = new Label();
@@ -92,6 +95,11 @@ public class GUI extends Application {
 
         algorithmComboBox.getItems().addAll(new RandomAlgorithm(), new PriorityAlgorithm());
         algorithmComboBox.getSelectionModel().selectFirst(); // Select the first algorithm by default
+
+        BorderPane.setAlignment(settingsPane.getScrollPane(), Pos.CENTER_RIGHT);
+        window.setRight(settingsPane);
+        titleGrid.add(settingsPane.getToggleButton(), 2, 0); // Place the toggle button
+
 
         // add the action pane and all elements inside it; the action pane will always be 100px tall
         actionGridEdit.add(addNewTaskButton, 0, 0);

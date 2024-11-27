@@ -86,6 +86,10 @@ public class CalendarWeek {
 
 		return tasksForDay;
 	}
+
+	public void setStartTime(LocalDateTime newStartTime) {
+		startTime = newStartTime;
+	}
 	
 	// TODO more functions that can manage a schedule on a weekly basis
 	// - Maybe reschedule a single day only?
