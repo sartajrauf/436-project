@@ -2,6 +2,7 @@ package gui;
 
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import model.Task;
 import java.time.LocalDateTime;
@@ -59,59 +60,68 @@ public class TaskCreationDialog {
 
         dialog.getDialogPane().setContent(grid);
 
-        // Show the dialog and wait for the user's response
-        Optional<ButtonType> result = dialog.showAndWait();
-        if (result.isPresent() && result.get() == okButtonType) {
-            // Step 2: Handle the input
+        // Get the OK button from the dialog and attach validation logic
+        final Button okButton = (Button) dialog.getDialogPane().lookupButton(okButtonType);
+        okButton.addEventFilter(ActionEvent.ACTION, event -> {
             String taskName = taskNameField.getText().trim();
             if (taskName.isEmpty()) {
                 showAlert("Invalid Input", "Task name cannot be empty.");
-                return Optional.empty();
+                event.consume(); // Prevent dialog from closing
+                return;
             }
 
-            double estimatedTime = 0;
             try {
-                estimatedTime = Double.parseDouble(estimatedTimeField.getText().trim());
+                double estimatedTime = Double.parseDouble(estimatedTimeField.getText().trim());
                 if (estimatedTime <= 0) {
                     showAlert("Invalid Input", "Estimated time must be a positive number.");
-                    return Optional.empty();
+                    event.consume();
+                    return;
                 }
             } catch (NumberFormatException e) {
                 showAlert("Invalid Input", "Please enter a valid number for the estimated time.");
-                return Optional.empty();
+                event.consume();
+                return;
             }
 
-            int priority = 1;
             try {
-                priority = Integer.parseInt(priorityField.getText().trim());
+                int priority = Integer.parseInt(priorityField.getText().trim());
                 if (priority <= 0 || priority > 10) {
                     showAlert("Invalid Input", "Priority should be between 1-10.");
-                    return Optional.empty();
+                    event.consume();
+                    return;
                 }
             } catch (NumberFormatException e) {
                 showAlert("Invalid Input", "Please enter a valid number for the priority.");
-                return Optional.empty();
+                event.consume();
+                return;
             }
 
             LocalDate deadlineDate = deadlineDatePicker.getValue();
             Integer deadlineHour = hourPicker.getValue();
             if (deadlineDate == null || deadlineHour == null) {
                 showAlert("Invalid Input", "Please select a valid deadline date and time.");
-                return Optional.empty();
+                event.consume();
             }
+        });
 
-            // Combine date and hour into a LocalDateTime
-            LocalDateTime deadline = deadlineDate.atStartOfDay().plusHours(deadlineHour);
+        // Show the dialog and wait for the user's response
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.isPresent() && result.get() == okButtonType) {
+            // Gather validated inputs
+            String taskName = taskNameField.getText().trim();
+            double estimatedTime = Double.parseDouble(estimatedTimeField.getText().trim());
+            int priority = Integer.parseInt(priorityField.getText().trim());
+            LocalDateTime deadline = deadlineDatePicker.getValue().atStartOfDay().plusHours(hourPicker.getValue());
 
-            // Create the task with the gathered data
+            // Create and return the task
             Task newTask = new Task(taskName, estimatedTime);
             newTask.setPriority(priority);
             newTask.setDeadline(deadline);
 
-            return Optional.of(newTask); // Return the newly created task
+            return Optional.of(newTask);
         }
 
-        return Optional.empty(); // User cancelled or closed the dialog
+        return Optional.empty(); // User cancelled the dialog
     }
 
     private void showAlert(String title, String content) {
