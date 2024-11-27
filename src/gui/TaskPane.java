@@ -275,7 +275,7 @@ public class TaskPane extends BorderPane {
                 }
             
                 // begin task placement at that location down to the hour.
-                LocalDateTime startTime = gui.currentWeek.getStartWeek().atStartOfDay();
+                LocalDateTime startTime = gui.currentWeek.getFirstDayOfWeek().atStartOfDay();
                 LocalDateTime startTimeDays = startTime.plus(Duration.ofDays(dayCol));
                 LocalDateTime startTimeHours = startTimeDays.plus(Duration.ofHours(hourRow));
                 LocalDateTime newTime = startTimeHours;

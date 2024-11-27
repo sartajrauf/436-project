@@ -16,7 +16,11 @@ public class CalendarWeek {
 	
 	public CalendarWeek(LocalDateTime anyDate) {
 		if (anyDate == null) {anyDate = LocalDateTime.now(); }
-		this.startTime = anyDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+		// We either use getFirstDayOfWeek() to get the absolute start of the week
+		// or getStartTime() to get the start of the allowed schedule of the week
+		// (for the algorithm)
+		// this.startTime = anyDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+		this.startTime = anyDate;
         this.endTime = startTime.plusDays(6);
 
 		// Debug: Print start and end times for this week
@@ -37,13 +41,23 @@ public class CalendarWeek {
 		return startTime;
 	}
 
+	public LocalDateTime getEndTime() {
+		return endTime;
+	}
+
 	// Explicitly get the start of the week. Date is needed and not time.
-	public LocalDate getStartWeek() {
+	public LocalDate getFirstDayOfWeek() {
 		return startTime.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate();
 	}
 
-	public LocalDateTime getEndTime() {
-		return endTime;
+	// Explicitly get the end of the week. Date is needed and not time.
+	public LocalDate getLastDayOfWeek() {
+		return startTime.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate().plusDays(6);
+	}
+
+	// Explicitly get the next start of the week. Date is needed and not time.
+	public LocalDate getNextFirstDayOfWeek() {
+		return startTime.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate().plusDays(7);
 	}
 
 	public String getTimeframeString() {
