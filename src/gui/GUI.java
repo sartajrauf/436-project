@@ -262,17 +262,17 @@ public class GUI extends Application {
     private void setInitialElementSizes() {
         // Use percentage-based widths
         ColumnConstraints rightAlignButton = new ColumnConstraints();
-        rightAlignButton.setPercentWidth(33.33);
+        rightAlignButton.setPercentWidth(25);
         rightAlignButton.setHalignment(HPos.RIGHT);
         titleGrid.getColumnConstraints().add(rightAlignButton);
 
         ColumnConstraints centerAlignLabel = new ColumnConstraints();
-        centerAlignLabel.setPercentWidth(33.33);
+        centerAlignLabel.setPercentWidth(50);
         centerAlignLabel.setHalignment(HPos.CENTER);
         titleGrid.getColumnConstraints().add(centerAlignLabel);
 
         ColumnConstraints leftAlignButton = new ColumnConstraints();
-        leftAlignButton.setPercentWidth(33.33);
+        leftAlignButton.setPercentWidth(25);
         leftAlignButton.setHalignment(HPos.LEFT);
         titleGrid.getColumnConstraints().add(leftAlignButton);
 
