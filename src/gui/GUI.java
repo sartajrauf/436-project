@@ -29,6 +29,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import model.Algorithm;
 import model.Calendar;
 import model.CalendarWeek;
@@ -124,6 +125,12 @@ public class GUI extends Application {
         // update if the user resizes the screen
         setInitialElementSizes();
         setupEvents(primaryStage, scene);
+
+        primaryStage.addEventFilter(WindowEvent.WINDOW_SHOWN, e -> {
+            taskPane.layout();  // Force layout recalculation after maximization
+            taskPane.mainGrid.layout();
+            System.out.println("resize");
+        });
     }
 
     private void setupEvents(Stage primaryStage, Scene scene) {
