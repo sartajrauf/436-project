@@ -212,7 +212,7 @@ public class TaskPane extends BorderPane {
         });
     }
 
-    private void updateDimensions(double newHeight, double newWidth) {
+    public void updateDimensions(double newHeight, double newWidth) {
         // Handle height calculations
         this.total_height = (int) newHeight - 20;
         this.hour_height = this.total_height / HOURS_IN_DAY;

@@ -134,11 +134,9 @@ public class GUI extends Application {
         setInitialElementSizes();
         setupEvents(primaryStage, scene);
 
-        primaryStage.addEventFilter(WindowEvent.WINDOW_SHOWN, e -> {
-            taskPane.layout();  // Force layout recalculation after maximization
-            taskPane.mainGrid.layout();
-            System.out.println("resize");
-        });
+
+        taskPane.updateDimensions(taskPane.getHeight(), taskPane.getWidth());
+        taskPane.refresh();
     }
 
     private void setupEvents(Stage primaryStage, Scene scene) {
