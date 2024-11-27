@@ -296,19 +296,25 @@ public class GUI extends Application {
 
     // set the dimensions of every element, static or dynamic; will be called once at startup
     private void setInitialElementSizes() {
-
-        ColumnConstraints rightAlignButton = new ColumnConstraints((window.getWidth() - 375) / 2);
+        // Instead of calculating absolute widths based on window size, use percentage-based widths
+        ColumnConstraints rightAlignButton = new ColumnConstraints();
+        rightAlignButton.setPercentWidth(33.33);
         rightAlignButton.setHalignment(HPos.RIGHT);
         titleGrid.getColumnConstraints().add(rightAlignButton);
-        ColumnConstraints centerAlignLabel = new ColumnConstraints(335);
+
+        ColumnConstraints centerAlignLabel = new ColumnConstraints();
+        centerAlignLabel.setPercentWidth(33.33);
         centerAlignLabel.setHalignment(HPos.CENTER);
         titleGrid.getColumnConstraints().add(centerAlignLabel);
-        ColumnConstraints leftAlignButton = new ColumnConstraints((window.getWidth() - 335) / 2);
+
+        ColumnConstraints leftAlignButton = new ColumnConstraints();
+        leftAlignButton.setPercentWidth(33.33);
         leftAlignButton.setHalignment(HPos.LEFT);
         titleGrid.getColumnConstraints().add(leftAlignButton);
 
+        // Ensure the action grid's columns are flexible
         ColumnConstraints cc = new ColumnConstraints();
-        cc.setPercentWidth(33.33);
+        cc.setPercentWidth(33.33); // distribute available space equally
         actionGrid.getColumnConstraints().addAll(cc, cc, cc);
     }    
 
