@@ -120,17 +120,6 @@ public class TaskPane extends BorderPane {
         GridPane.setHgrow(drawContainer, Priority.ALWAYS); // Horizontally expand
         GridPane.setVgrow(drawContainer, Priority.ALWAYS); // Vertically expand
 
-        // Add listeners if you need to monitor the size
-        drawContainer.widthProperty().addListener((observable, oldValue, newValue) -> {
-            double width = drawContainer.getWidth();
-            System.out.println("Container width: " + width);
-        });
-
-        drawContainer.heightProperty().addListener((observable, oldValue, newValue) -> {
-            double height = drawContainer.getHeight();
-            System.out.println("Container height: " + height);
-        });
-
         // Ensure no padding or margins for the container and parent grid
         mainGrid.setPadding(Insets.EMPTY);  // Remove padding from GridPane
         mainGrid.setHgap(0);  // Ensure there's no horizontal gap
