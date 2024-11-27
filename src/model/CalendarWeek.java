@@ -1,5 +1,6 @@
 package model;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -34,6 +35,11 @@ public class CalendarWeek {
 	
 	public LocalDateTime getStartTime() {
 		return startTime;
+	}
+
+	// Explicitly get the start of the week. Date is needed and not time.
+	public LocalDate getStartWeek() {
+		return startTime.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate();
 	}
 
 	public LocalDateTime getEndTime() {

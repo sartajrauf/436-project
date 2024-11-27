@@ -1,9 +1,12 @@
 package gui;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import gui.GUI.HandleEditEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
@@ -12,12 +15,15 @@ import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
+import model.CalendarWeek;
 import model.Schedule;
 import model.TimeBlock;
 
@@ -43,6 +49,7 @@ public class TaskPane extends ScrollPane {
     private GridPane dayNames = new GridPane();
     private ArrayList<Label> dayLabels = new ArrayList<>();
     private ArrayList<Label> hourLabels = new ArrayList<>();
+    private Pane hoverPane = new Pane();
 
     public TaskPane() {
         this.setFitToWidth(true); // Ensure it fits the width
@@ -64,9 +71,47 @@ public class TaskPane extends ScrollPane {
         // Draw gridlines
         drawGridLines();
 
+        // init hover pane
+        initHoverPane();
+        
         this.setContent(borderPane);
     }
 
+    private void initHoverPane() {
+        hoverPane.setBackground(Background.fill(Paint.valueOf("gray")));
+        hoverPane.setPrefSize(day_width, hour_height);
+
+        container.getChildren().add(hoverPane);
+
+        container.setOnMouseMoved(eMouseEvent -> {
+            hoverPane.setOpacity(1);
+            double x = eMouseEvent.getX();
+            double y = eMouseEvent.getY();
+            System.out.println("Mouse moved: " + x + " " + y);
+
+            // figure out what day column it is.
+            int dayCol = (int)(x/day_width);
+
+            // figure out what hour row it is.
+            int hourRow = (int)(y/hour_height);
+
+            // if it's out of bounds then ignore it
+            if (dayCol < 0 || dayCol > 6 || hourRow < 0 || hourRow > 23){
+                return;
+            }
+        
+            // begin task placement at that location down to the hour.
+            // LocalDateTime newTime = gui.currentWeek.getStartTime().plus(Duration.ofDays(dayCol).plus(Duration.ofHours(hourRow)));
+            // TimeBlock timeBlock = gui.addNewTaskAt(gui.currentWeek.getSchedule(), newTime);
+            // if (timeBlock != null){
+            //     taskPane.addTimeBlock(timeBlock, gui.new HandleEditEvent(timeBlock));
+            // }
+            hoverPane.setLayoutX(dayCol*day_width);
+            hoverPane.setLayoutY(hourRow*hour_height);
+            // eMouseEvent.consume();
+        });
+    }
+        
     private void setupLabels() {
         String[] days = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
 
@@ -110,6 +155,8 @@ public class TaskPane extends ScrollPane {
                 label.setMaxHeight(hourLabelHeightt - 1);
                 label.setFont(new Font(Math.max(hour_height - 4, 1)));
             });
+            hoverPane.setPrefSize(day_width, hour_height);
+            hoverPane.setOpacity(0);
             refresh();
         });
         this.widthProperty().addListener((observable, oldWidth, newWidth) -> {
@@ -125,6 +172,8 @@ public class TaskPane extends ScrollPane {
                 label.setMaxWidth(day_width);
                 label.setPadding(new Insets(0, 0, 0, day_width / 2));
             });
+            hoverPane.setPrefSize(day_width, hour_height);
+            hoverPane.setOpacity(0);
             // System.out.println();
             // System.out.println("Offset Width: " + (int)container.localToScene(0, 0).getX());
             // System.out.println("Window Width: " + newWidth.intValue());
@@ -132,6 +181,39 @@ public class TaskPane extends ScrollPane {
             // System.out.println("Day Width: " + this.day_width);
             // System.out.println("Border Width: " + borderPane.widthProperty().intValue());
             refresh();
+        });
+    }
+
+    public void setupPlacementHandler(TaskPane taskPane, GUI gui) {
+        this.setActionOnScheduleClick(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent eMouseEvent) {
+                double x = eMouseEvent.getX();
+                double y = eMouseEvent.getY();
+
+                // figure out what day column it is.
+                int dayCol = (int)(x/day_width);
+
+                // figure out what hour row it is.
+                int hourRow = (int)(y/hour_height);
+
+                // if it's out of bounds then ignore it
+                if (dayCol < 0 || dayCol > 6 || hourRow < 0 || hourRow > 23){
+                    eMouseEvent.consume();
+                    return;
+                }
+            
+                // begin task placement at that location down to the hour.
+                LocalDateTime startTime = gui.currentWeek.getStartWeek().atStartOfDay();
+                LocalDateTime startTimeDays = startTime.plus(Duration.ofDays(dayCol));
+                LocalDateTime startTimeHours = startTimeDays.plus(Duration.ofHours(hourRow));
+                LocalDateTime newTime = startTimeHours;
+                TimeBlock timeBlock = gui.addNewTaskAt(gui.currentWeek.getSchedule(), newTime);
+                if (timeBlock != null){
+                    taskPane.addTimeBlock(timeBlock, gui.new HandleEditEvent(timeBlock));
+                }
+                eMouseEvent.consume();
+            }
         });
     }
 
