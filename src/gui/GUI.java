@@ -296,7 +296,7 @@ public class GUI extends Application {
 
     // set the dimensions of every element, static or dynamic; will be called once at startup
     private void setInitialElementSizes() {
-        // Instead of calculating absolute widths based on window size, use percentage-based widths
+        // Use percentage-based widths
         ColumnConstraints rightAlignButton = new ColumnConstraints();
         rightAlignButton.setPercentWidth(33.33);
         rightAlignButton.setHalignment(HPos.RIGHT);
@@ -316,18 +316,6 @@ public class GUI extends Application {
         ColumnConstraints cc = new ColumnConstraints();
         cc.setPercentWidth(33.33); // distribute available space equally
         actionGrid.getColumnConstraints().addAll(cc, cc, cc);
-    }    
-
-    // sets the dimensions that dynamic elements must conform to to fit nicely on the screen; this function
-    // will be called automatically every time the user resizes the screen
-    private void setElementSizes() {
-
-        ColumnConstraints rightAlignButton = new ColumnConstraints((window.getWidth() - 375) / 2);
-        rightAlignButton.setHalignment(HPos.RIGHT);
-        titleGrid.getColumnConstraints().set(0, rightAlignButton);
-        ColumnConstraints leftAlignButton = new ColumnConstraints((window.getWidth() - 335) / 2);
-        leftAlignButton.setHalignment(HPos.LEFT);
-        titleGrid.getColumnConstraints().set(2, leftAlignButton);
     }
 
     private void updateTable(Schedule schedule) {
