@@ -136,8 +136,6 @@ public class GUI extends Application {
     private void setupEvents(Stage primaryStage, Scene scene) {
         setupButtonHandlers();
 
-        setupResizeHandlers(primaryStage);
-
         setupPlacementHandler();
         
         setupCurrentTimeHandler();
@@ -170,46 +168,6 @@ public class GUI extends Application {
 
     private void setupPlacementHandler() {
         taskPane.setupPlacementHandler(taskPane, this);
-        // taskPane.setActionOnScheduleClick(new EventHandler<MouseEvent>() {
-        //     @Override
-        //     public void handle(MouseEvent eMouseEvent) {
-        //         double x = eMouseEvent.getX();
-        //         double y = eMouseEvent.getY();
-
-        //         // figure out what day column it is.
-        //         int dayCol = (int)(x/TaskPane.DAY_WIDTH);
-
-        //         // figure out what hour row it is.
-        //         int hourRow = (int)(y/TaskPane.HOUR_HEIGHT);
-
-        //         // if it's out of bounds then ignore it
-        //         if (dayCol < 0 || dayCol > 6 || hourRow < 0 || hourRow > 23){
-        //             eMouseEvent.consume();
-        //             return;
-        //         }
-
-        //         // begin task placement at that location down to the hour.
-        //         LocalDateTime newTime = currentWeek.getStartTime().plus(Duration.ofDays(dayCol).plus(Duration.ofHours(hourRow)));
-        //         TimeBlock timeBlock = addNewTaskAt(currentWeek.getSchedule(), newTime);
-        //         if (timeBlock != null){
-        //             taskPane.addTimeBlock(timeBlock, new HandleEditEvent(timeBlock));
-        //         }
-        //         eMouseEvent.consume();
-        //     }
-        // });
-    }
-
-    private void setupResizeHandlers(Stage primaryStage) {
-        primaryStage.widthProperty().addListener((obs, oldVal, newVal) -> {
-            setElementSizes();
-        });
-        primaryStage.heightProperty().addListener((obs, oldVal, newVal) -> {
-            setElementSizes();
-        });
-        primaryStage.maximizedProperty().addListener((obs, oldVal, newVal) -> {
-            // this isn't working for some reason, will figure it out later
-            setElementSizes();
-        });
     }
 
     private void setupButtonHandlers() {
