@@ -94,6 +94,10 @@ public class CalendarWeek {
 	public void setEndTime(LocalDateTime newEndTime) {
 		endTime = newEndTime;
 	}
+
+	public LocalDate startOfWeek(LocalDate date){
+		return date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+	}
 	
 	// TODO more functions that can manage a schedule on a weekly basis
 	// - Maybe reschedule a single day only?

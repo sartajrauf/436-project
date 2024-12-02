@@ -1,5 +1,7 @@
 package gui;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
@@ -51,8 +53,8 @@ public class SettingsPane extends VBox {
         considerNightCheckBox = new CheckBox("Consider Night");
         weekStartTimeField = new DatePicker();
         weekEndTimeField = new DatePicker();
-        // setWeekStartNowButton = new Button("Set Start Time to Now");
-        // setWeekStartBeginButton = new Button("Set Start Time to Week Start");
+        setWeekStartNowButton = new Button("Set Start Time to Now");
+        setWeekStartBeginButton = new Button("Set Start Time to Week Start");
 
         // Add listeners for settings updates
         Runnable applyChanges = this::applySettingsChanges;
@@ -62,6 +64,7 @@ public class SettingsPane extends VBox {
         addSettingsListeners(weekStartTimeField, applyChanges);
         addSettingsListeners(weekEndTimeField, applyChanges);
         considerNightCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> applySettingsChanges());
+        initializeSettingWeekButtons();
 
         // Add components to content with labels
         content.getChildren().addAll(
@@ -73,9 +76,9 @@ public class SettingsPane extends VBox {
             new Label("Week Start Date:"),    // Label for week start date
             weekStartTimeField,
             new Label("Week End Date:"),      // Label for week end date
-            weekEndTimeField
-            // setWeekStartNowButton,
-            // setWeekStartBeginButton
+            weekEndTimeField,
+            setWeekStartNowButton,
+            setWeekStartBeginButton
         );
 
         scrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
@@ -83,6 +86,17 @@ public class SettingsPane extends VBox {
 
         scrollPane.setContent(content);
         scrollPane.setVisible(false); // Initially hidden
+    }
+
+    private void initializeSettingWeekButtons() {
+        setWeekStartNowButton.setOnAction(arg0 -> {
+            weekStartTimeField.valueProperty().setValue(LocalDate.now());
+            gui.currentWeek.setStartTime(weekStartTimeField.valueProperty().getValue().atStartOfDay());
+        });
+        setWeekStartBeginButton.setOnAction(arg0 -> {
+            weekStartTimeField.valueProperty().setValue(gui.currentWeek.startOfWeek(weekStartTimeField.valueProperty().getValue()));
+            gui.currentWeek.setStartTime(weekStartTimeField.valueProperty().getValue().atStartOfDay());
+        });
     }
 
     private void initializeToggleButton() {
