@@ -80,6 +80,13 @@ public class GUI extends Application {
     @Override
     public void start(Stage primaryStage) {
 
+        // Force it to close. For some reason it won't close. (Specifications
+        // state that the JavaFX app closes when ALL Stage objects are closed)
+        primaryStage.setOnCloseRequest(arg0 -> {
+            Platform.exit();
+            System.exit(0);
+        });
+
         // add the title; the title will always be 100px tall
         // calendar.loadWeeksFromFiles();
         titleGrid.setHgap(20);
