@@ -1,5 +1,8 @@
 package gui;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
 import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -12,6 +15,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.DatePicker;
 
 public class SettingsPane extends VBox {
     private final ScrollPane scrollPane = new ScrollPane();
@@ -19,35 +25,57 @@ public class SettingsPane extends VBox {
     private final Button toggleButton = new Button("Show Settings");
     private boolean isPaneVisible = false;
 
-    public SettingsPane() {
+    public GUI gui;
+
+    private TimeSpinner nightStartTimeField; 
+    private TimeSpinner nightEndTimeField;
+    private CheckBox considerNightCheckBox;
+    private DatePicker weekStartTimeField;
+    private DatePicker weekEndTimeField;
+    private Button setWeekStartNowButton;
+    private Button setWeekStartBeginButton;
+
+    public SettingsPane(GUI gui) {
         initializeSettingsPane();
         initializeToggleButton();
+        this.gui = gui;
     }
 
     private void initializeSettingsPane() {
         content.setPadding(new Insets(10));
         content.setPrefWidth(250);
 
-        // Example settings options
-        TextField nightStartTimeField = new TextField("20:00");
-        TextField nightEndTimeField = new TextField("06:00");
-        CheckBox considerNightCheckBox = new CheckBox("Consider Night");
-        TextField weekStartTimeField = new TextField("Start of Week");
-        TextField weekEndTimeField = new TextField("End of Week");
-        Button setWeekStartNowButton = new Button("Set Start Time to Now");
-        Button setWeekStartBeginButton = new Button("Set Start Time to Week Start");
+        // Components with appropriate types
+        nightStartTimeField = new TimeSpinner();
+        nightEndTimeField = new TimeSpinner();
+        considerNightCheckBox = new CheckBox("Consider Night");
+        weekStartTimeField = new DatePicker();
+        weekEndTimeField = new DatePicker();
+        // setWeekStartNowButton = new Button("Set Start Time to Now");
+        // setWeekStartBeginButton = new Button("Set Start Time to Week Start");
 
-        // Add components to content
+        // Add listeners for settings updates
+        Runnable applyChanges = this::applySettingsChanges;
+
+        addSettingsListeners(nightStartTimeField, applyChanges);
+        addSettingsListeners(nightEndTimeField, applyChanges);
+        addSettingsListeners(weekStartTimeField, applyChanges);
+        addSettingsListeners(weekEndTimeField, applyChanges);
+        considerNightCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> applySettingsChanges());
+
+        // Add components to content with labels
         content.getChildren().addAll(
-            new Label("Night Settings"),
+            new Label("Night Start Time:"),   // Label for night start time
             nightStartTimeField,
+            new Label("Night End Time:"),     // Label for night end time
             nightEndTimeField,
             considerNightCheckBox,
-            new Label("Week Settings"),
+            new Label("Week Start Date:"),    // Label for week start date
             weekStartTimeField,
-            weekEndTimeField,
-            setWeekStartNowButton,
-            setWeekStartBeginButton
+            new Label("Week End Date:"),      // Label for week end date
+            weekEndTimeField
+            // setWeekStartNowButton,
+            // setWeekStartBeginButton
         );
 
         scrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
@@ -70,6 +98,7 @@ public class SettingsPane extends VBox {
             }
             animatePane(true); // Slide in
             toggleButton.setText("Hide Settings");
+            loadWeekValues();
         } else {
             // Hide the settings pane
             animatePane(false); // Slide out
@@ -93,6 +122,44 @@ public class SettingsPane extends VBox {
             });
         }
         transition.play();
+    }
+
+    public void loadWeekValues() {
+        nightStartTimeField.getValueFactory().setValue(gui.currentWeek.getSchedule().getAlgorithm().getNightStart());
+        nightEndTimeField.getValueFactory().setValue(gui.currentWeek.getSchedule().getAlgorithm().getNightEnd());
+        considerNightCheckBox.selectedProperty().setValue(gui.currentWeek.getSchedule().getAlgorithm().getNightCheck());
+        weekStartTimeField.valueProperty().setValue(gui.currentWeek.getStartTime().toLocalDate());
+        weekEndTimeField.valueProperty().setValue(gui.currentWeek.getEndTime().toLocalDate());
+    }
+
+    private void addSettingsListeners(Node node, Runnable applyChanges) {
+        // Listen for Enter key
+        node.setOnKeyPressed(event -> {
+            switch (event.getCode()) {
+                case ENTER -> applyChanges.run();
+            }
+        });
+    
+        // Listen for focus loss
+        node.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                applyChanges.run();
+            }
+        });
+    }
+
+    private void applySettingsChanges() {
+        if (!isPaneVisible) {
+            // skip if can't see
+            return;
+        }
+        // Code to apply the settings changes
+        gui.currentWeek.getSchedule().getAlgorithm().setNightStart(nightStartTimeField.valueProperty().get());
+        gui.currentWeek.getSchedule().getAlgorithm().setNightEnd(nightEndTimeField.valueProperty().get());
+        gui.currentWeek.getSchedule().getAlgorithm().setNightCheck(considerNightCheckBox.selectedProperty().get());
+        gui.currentWeek.setStartTime(weekStartTimeField.valueProperty().getValue().atStartOfDay());
+        gui.currentWeek.setEndTime(weekEndTimeField.valueProperty().getValue().atStartOfDay());
+        System.out.println("Settings have been updated!");
     }
 
     public Node getScrollPane() {

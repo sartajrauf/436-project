@@ -8,6 +8,7 @@ import java.util.Random;
 public class RandomAlgorithm implements Algorithm {
     LocalTime nightStart = LocalTime.of(22, 0);
     LocalTime nightEnd = LocalTime.of(5, 0);
+    boolean nightCheck = true;
     int seed = 1;
     @Override
     public TimeBlock applyAlgorithm(Schedule schedule, Task task) {
@@ -73,5 +74,13 @@ public class RandomAlgorithm implements Algorithm {
 
     public void setNightEnd(LocalTime nightEnd) {
         this.nightEnd = nightEnd;
+    }
+
+    public void setNightCheck(boolean nightCheck){
+        this.nightCheck = nightCheck;
+    }
+    
+    public boolean getNightCheck(){
+        return nightCheck;
     }
 }

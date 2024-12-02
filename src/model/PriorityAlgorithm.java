@@ -1,8 +1,12 @@
 package model;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Comparator;
 
 public class PriorityAlgorithm implements Algorithm {
+    LocalTime nightStart = LocalTime.of(22, 0);
+    LocalTime nightEnd = LocalTime.of(5, 0);
+    boolean nightCheck = true;
     @Override
     public TimeBlock applyAlgorithm(Schedule schedule, Task task) {
         LocalDateTime nextAvailableSlot = schedule.findNextAvailableSlot(task.getEstimatedTime());
@@ -34,5 +38,29 @@ public class PriorityAlgorithm implements Algorithm {
             timeBlock.setEndTime(newEndTime);
             currentTime = newEndTime;
         }
+    }
+
+    public LocalTime getNightStart() {
+        return nightStart;
+    }
+
+    public void setNightStart(LocalTime nightStart) {
+        this.nightStart = nightStart;
+    }
+
+    public LocalTime getNightEnd() {
+        return nightEnd;
+    }
+
+    public void setNightEnd(LocalTime nightEnd) {
+        this.nightEnd = nightEnd;
+    }
+
+    public void setNightCheck(boolean nightCheck){
+        this.nightCheck = nightCheck;
+    }
+    
+    public boolean getNightCheck(){
+        return nightCheck;
     }
 }

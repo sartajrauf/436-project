@@ -53,7 +53,7 @@ public class GUI extends Application {
         new UniformDistributeAlgorithm());
     CalendarWeek currentWeek = calendar.getCurrentWeek();
     ComboBox<Algorithm> algorithmComboBox = new ComboBox<>();
-    SettingsPane settingsPane = new SettingsPane();
+    SettingsPane settingsPane = new SettingsPane(this);
 
     // decorative elements
     Label currentTimeLabel = new Label();
@@ -198,6 +198,7 @@ public class GUI extends Application {
                 currentWeek = calendar.getCurrentWeek();
                 title.setText(currentWeek.getTimeframeString());
                 updateTable(currentWeek.getSchedule());
+                settingsPane.loadWeekValues();
                 event.consume();
             }
         });
@@ -210,6 +211,7 @@ public class GUI extends Application {
                 currentWeek = calendar.getCurrentWeek();
                 title.setText(currentWeek.getTimeframeString());
                 updateTable(currentWeek.getSchedule());
+                settingsPane.loadWeekValues();
                 event.consume();
             }
         });

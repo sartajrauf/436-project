@@ -2,6 +2,7 @@ package model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -11,6 +12,9 @@ import java.util.stream.Collectors;
 // a task to the schedule in the next possible location.
 // TODO: add a guarentee that the task will be inserted if there is a gap.
 public class SequentialAlgorithm implements Algorithm {
+    LocalTime nightStart = LocalTime.of(22, 0);
+    LocalTime nightEnd = LocalTime.of(5, 0);
+    boolean nightCheck = true;
     @Override
     public TimeBlock applyAlgorithm(Schedule schedule, Task task) {
         /// insert sequentially in the next possible location.
@@ -79,5 +83,29 @@ public class SequentialAlgorithm implements Algorithm {
             timeBlock.setEndTime(newEndTime);
             currentTime = newEndTime;
         }
+    }
+
+    public LocalTime getNightStart() {
+        return nightStart;
+    }
+
+    public void setNightStart(LocalTime nightStart) {
+        this.nightStart = nightStart;
+    }
+
+    public LocalTime getNightEnd() {
+        return nightEnd;
+    }
+
+    public void setNightEnd(LocalTime nightEnd) {
+        this.nightEnd = nightEnd;
+    }
+
+    public void setNightCheck(boolean nightCheck){
+        this.nightCheck = nightCheck;
+    }
+    
+    public boolean getNightCheck(){
+        return nightCheck;
     }
 }

@@ -10,6 +10,7 @@ import java.util.Random;
 public class UniformDistributeAlgorithm implements Algorithm {
     LocalTime nightStart = LocalTime.of(22, 0);
     LocalTime nightEnd = LocalTime.of(5, 0);
+    boolean nightCheck = true;
     int seed = 1;
     @Override
     public TimeBlock applyAlgorithm(Schedule schedule, Task task) {
@@ -71,7 +72,7 @@ public class UniformDistributeAlgorithm implements Algorithm {
             // check if it can insert it (no collision with other blocks or schedule)
             // and if it isn't night time
             if (schedule.canInsertTimeBlock(testTimeBlock) && 
-                !schedule.checkIfIntersectingNight(testTimeBlock, nightEnd, nightStart)) {
+                (!nightCheck || !schedule.checkIfIntersectingNight(testTimeBlock, nightEnd, nightStart))) {
                 validLocations.add(testTimeBlock);
             }
             testScanTime = testScanTime.plusMinutes(intervalMinutes);
@@ -127,5 +128,13 @@ public class UniformDistributeAlgorithm implements Algorithm {
 
     public void setNightEnd(LocalTime nightEnd) {
         this.nightEnd = nightEnd;
+    }
+
+    public void setNightCheck(boolean nightCheck){
+        this.nightCheck = nightCheck;
+    }
+    
+    public boolean getNightCheck(){
+        return nightCheck;
     }
 }
