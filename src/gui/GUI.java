@@ -129,8 +129,8 @@ public class GUI extends Application {
         actionGrid.setPrefHeight(100);
         window.setBottom(actionTitlePane);
 
-        primaryStage.setMinWidth(500);
-        primaryStage.setMinHeight(500);
+        primaryStage.setMinWidth(700);
+        primaryStage.setMinHeight(700);
 
         Scene scene = new Scene(window, 735, 655);
         primaryStage.setScene(scene);
