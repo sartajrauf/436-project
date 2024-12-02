@@ -7,6 +7,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -29,7 +30,8 @@ public class TaskEditDialog {
         ButtonType rescheduleButtonType = new ButtonType("Reschedule (WIP)");
         ButtonType removeButtonType = new ButtonType("Remove Task");
         ButtonType cancelButtonType = ButtonType.CANCEL;
-        dialog.getDialogPane().getButtonTypes().addAll(acceptButtonType, rescheduleButtonType, cancelButtonType,
+        // do not add rescheduleButtonType to buttons
+        dialog.getDialogPane().getButtonTypes().addAll(acceptButtonType, cancelButtonType,
                 removeButtonType);
 
         // Create the labels and input fields
@@ -56,19 +58,31 @@ public class TaskEditDialog {
 
         // Time input fields (if you need to specify time as well)
         Label startTimeLabel = new Label("Start Time (HH:mm):");
-        TextField startTimeField = new TextField(timeBlock.getStartTime().toLocalTime().toString());
+        TimeSpinner startTimeField = new TimeSpinner();
+        startTimeField.getValueFactory().setValue(timeBlock.getStartTime().toLocalTime());
 
         Label endTimeLabel = new Label("End Time (HH:mm):");
-        TextField endTimeField = new TextField(timeBlock.getEndTime().toLocalTime().toString());
+        TimeSpinner endTimeField = new TimeSpinner();
+        endTimeField.getValueFactory().setValue(timeBlock.getEndTime().toLocalTime());
 
-        Label deadlineDateLabel = new Label("Deadline Date (Not in use):");
-        DatePicker deadlineDatePicker = timeBlock.getTask().getDeadline() != null ? new DatePicker(timeBlock.getTask().getDeadline().toLocalDate()) : new DatePicker();
+        Label deadlineDateLabel = new Label("Deadline Date:");
+        DatePicker deadlineDatePicker = timeBlock.getTask().getDeadline() != null ? new DatePicker(timeBlock.getTask().getDeadline().toLocalDate().plusDays(7)) : new DatePicker();
 
         Label deadlineTimeLabel = new Label("Deadline Time (HH:mm):");
-        TextField deadlineTimeField = new TextField(timeBlock.getTask().getDeadline() != null ? timeBlock.getTask().getDeadline().toLocalTime().toString() : "00:00");
+        TimeSpinner deadlineTimeField = new TimeSpinner();
+        if (timeBlock.getTask().getDeadline() != null) {
+            deadlineTimeField.getValueFactory().setValue(timeBlock.getTask().getDeadline().toLocalTime());
+        }
 
-        Label priorityLabel = new Label("Priority (1-10) (Not in use):");
+        Label priorityLabel = new Label("Priority (1-10):");
         TextField priorityField = new TextField(timeBlock.getTask().getPriority() + "");
+
+        // Add the checkbox for locking the task
+        Label lockLabel = new Label("Lock Task:");
+        CheckBox lockCheckbox = new CheckBox();
+        lockCheckbox.setSelected(timeBlock.getTask().isFixed());
+
+
 
         // Add everything to the grid
         grid.add(descriptionLabel, 0, 0);
@@ -91,6 +105,8 @@ public class TaskEditDialog {
         grid.add(deadlineTimeField, 1, 8);
         grid.add(priorityLabel, 0, 9);
         grid.add(priorityField, 1, 9);
+        grid.add(lockLabel, 0, 10);
+        grid.add(lockCheckbox, 1, 10);
 
         dialog.getDialogPane().setContent(grid);
 
@@ -109,18 +125,21 @@ public class TaskEditDialog {
                 try {
                     // Get the date and time from DatePicker and TextField
                     LocalDate newStartDate = startDatePicker.getValue();
-                    LocalTime newStartTime = LocalTime.parse(startTimeField.getText(), timeFormatter);
+                    LocalTime newStartTime = startTimeField.getValueFactory().getValue();
                     LocalDateTime newStart = LocalDateTime.of(newStartDate, newStartTime);
 
                     // TODO maybe the end date should be removed or modified?
                     // This is because every time the user wants to change the date they have to do
                     // it twice, once for the start and again for the end.
                     LocalDate newEndDate = endDatePicker.getValue();
-                    LocalTime newEndTime = LocalTime.parse(endTimeField.getText(), timeFormatter);
+                    LocalTime newEndTime = endTimeField.getValueFactory().getValue();
                     LocalDateTime newEnd = LocalDateTime.of(newEndDate, newEndTime);
 
                     timeBlock.setStartTime(newStart);
                     timeBlock.setEndTime(newEnd);
+
+                    // Update lock status
+                    task.setFixed(lockCheckbox.isSelected());
 
                     boolean reschedule = dialogButton == rescheduleButtonType || dialogButton == acceptButtonType;
 
