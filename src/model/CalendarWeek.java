@@ -19,14 +19,14 @@ public class CalendarWeek {
 		// We either use getFirstDayOfWeek() to get the absolute start of the week
 		// or getStartTime() to get the start of the allowed schedule of the week
 		// (for the algorithm)
-		// this.startTime = anyDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-		this.startTime = anyDate;
-        this.endTime = startTime.plusDays(6);
+		this.startTime = anyDate.toLocalDate().atStartOfDay().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+		// this.startTime = anyDate;
+        this.endTime = startTime.plusDays(7);
 
 		// Debug: Print start and end times for this week
 		System.out.println("Week Start (Expected Monday): " + startTime);
 		System.out.println("Week End (Expected Sunday): " + endTime);
-		this.weekSchedule = new Schedule(startTime, startTime.plusDays(7));
+		this.weekSchedule = new Schedule(startTime, startTime.plusDays(7), new UniformDistributeAlgorithm());
 
 		LocalDateTime beforeEnd = endTime.minusMinutes(1);
 		this.timeframeString = startTime.getMonthValue() + "/" + startTime.getDayOfMonth() + "/" + startTime.getYear() + 
