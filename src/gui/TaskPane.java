@@ -404,11 +404,11 @@ public class TaskPane extends BorderPane {
         int startTimeMinutes = timeBlock.getStartTime().getHour() * 60 + (int) timeBlock.getStartTime().getMinute(); 
         // Assuming TimeBlock has a method to get the duration
         double duration = (double) timeBlock.getDuration().toMinutes() / 60;
-        double blockHeight = Math.min(
-                Math.max(
-                        MINIMUM_TASK_HEIGHT,
-                        duration * hour_height),
-                total_height - ((double) startTimeMinutes / 60 * hour_height) - hour_height);
+        double rawHeight = duration * hour_height;
+        double maxAvailableHeight = total_height - ((double) startTimeMinutes / 60 * hour_height);
+        double constrainedHeight = Math.max(MINIMUM_TASK_HEIGHT, rawHeight);
+        // block height cannot be allowed to render past the available height
+        double blockHeight = Math.min(constrainedHeight, maxAvailableHeight);
 
         // Create a pane for the time block representation
         // Styling for visibility
