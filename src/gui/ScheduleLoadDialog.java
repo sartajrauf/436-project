@@ -17,9 +17,11 @@ public class ScheduleLoadDialog {
         ArrayList<String> filenames = new ArrayList<>();
 
         // only json files should be considered to be loaded
-        for (int i = 0; i < files.length; i++) {
-            if (files[i].getName().endsWith(".json")) {
-                filenames.add(files[i].getName().substring(0, files[i].getName().lastIndexOf('.')));
+        if (files != null) {
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].getName().endsWith(".json")) {
+                    filenames.add(files[i].getName().substring(0, files[i].getName().lastIndexOf('.')));
+                }
             }
         }
 
