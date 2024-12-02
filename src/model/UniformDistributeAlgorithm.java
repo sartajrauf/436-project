@@ -115,7 +115,7 @@ public class UniformDistributeAlgorithm implements Algorithm {
             schedule.getTimeBlocks().clear();
             schedule.getTimeBlocks().addAll(copyOfTimeBlocks);
         }
-        
+        seed++;
     }
 
     private void assignStartTimes(Schedule schedule) {
