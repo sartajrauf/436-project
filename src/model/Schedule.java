@@ -18,6 +18,8 @@ import java.util.List;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+
+import exceptions.NoSpaceLeftException;
 /*
 * Schedule contains the TimeBlock and Task as well as a start time and end time
 * of this 
@@ -188,15 +190,27 @@ public class Schedule {
         if (!isValid()) {
 
             // save the tasks and delete them all
-            List<TimeBlock> oldBlocks = timeBlocks;
-            while (!timeBlocks.isEmpty()) {
-                timeBlocks.remove(0);
-            }
+            List<TimeBlock> oldBlocks = List.copyOf(timeBlocks);
+            // if the task fits then don't reorganize
+            timeBlocks.removeIf(t -> {
+                return !canInsertTimeBlock(t);
+            });
 
-            // re-add the tasks to get them back in valid positions
-            for (TimeBlock timeblock : oldBlocks) {
-                addTask(timeblock.getTask());
+            try {
+                // re-add the tasks to get them back in valid positions
+                for (TimeBlock timeblock : oldBlocks) {
+                    var res = algorithm.applyAlgorithm(this, timeblock.getTask());
+                    if (res == null) {
+                        throw new NoSpaceLeftException();
+                    }
+                }
+            } catch (NoSpaceLeftException e) {
+                // could not re-add tasks, restore tasks
+                System.out.println("Could not reorganize tasks after changing end time");
+                timeBlocks.clear();
+                timeBlocks.addAll(oldBlocks);
             }
+            
         }
     }
     public void setEndTime(LocalDateTime endTime) {
@@ -204,14 +218,25 @@ public class Schedule {
         if (!isValid()) {
 
             // save the tasks and delete them all
-            List<TimeBlock> oldBlocks = timeBlocks;
-            while (!timeBlocks.isEmpty()) {
-                timeBlocks.remove(0);
-            }
+            List<TimeBlock> oldBlocks = List.copyOf(timeBlocks);
+            // if the task fits then don't reorganize
+            timeBlocks.removeIf(t -> {
+                return !canInsertTimeBlock(t);
+            });
 
-            // re-add the tasks to get them back in valid positions
-            for (TimeBlock timeblock : oldBlocks) {
-                addTask(timeblock.getTask());
+            try {
+                // re-add the tasks to get them back in valid positions
+                for (TimeBlock timeblock : oldBlocks) {
+                    var res = algorithm.applyAlgorithm(this, timeblock.getTask());
+                    if (res == null) {
+                        throw new NoSpaceLeftException();
+                    }
+                }
+            } catch (NoSpaceLeftException e) {
+                // could not re-add tasks, restore tasks
+                System.out.println("Could not reorganize tasks after changing end time");
+                timeBlocks.clear();
+                timeBlocks.addAll(oldBlocks);
             }
         }
     }

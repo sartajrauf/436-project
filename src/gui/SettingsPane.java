@@ -90,12 +90,14 @@ public class SettingsPane extends VBox {
 
     private void initializeSettingWeekButtons() {
         setWeekStartNowButton.setOnAction(arg0 -> {
-            weekStartTimeField.valueProperty().setValue(LocalDate.now());
-            gui.currentWeek.setStartTime(weekStartTimeField.valueProperty().getValue().atStartOfDay());
+            gui.currentWeek.setStartTime(LocalDateTime.now());
+            weekStartTimeField.valueProperty().setValue(gui.currentWeek.getStartTime().toLocalDate());
+            gui.taskPane.refresh(gui, gui.currentWeek.getSchedule());
         });
         setWeekStartBeginButton.setOnAction(arg0 -> {
             weekStartTimeField.valueProperty().setValue(gui.currentWeek.startOfWeek(weekStartTimeField.valueProperty().getValue()));
             gui.currentWeek.setStartTime(weekStartTimeField.valueProperty().getValue().atStartOfDay());
+            gui.taskPane.refresh(gui, gui.currentWeek.getSchedule());
         });
     }
 
@@ -144,6 +146,7 @@ public class SettingsPane extends VBox {
         considerNightCheckBox.selectedProperty().setValue(gui.currentWeek.getSchedule().getAlgorithm().getNightCheck());
         weekStartTimeField.valueProperty().setValue(gui.currentWeek.getStartTime().toLocalDate());
         weekEndTimeField.valueProperty().setValue(gui.currentWeek.getEndTime().toLocalDate());
+        gui.taskPane.refresh(gui, gui.currentWeek.getSchedule());
     }
 
     private void addSettingsListeners(Node node, Runnable applyChanges) {

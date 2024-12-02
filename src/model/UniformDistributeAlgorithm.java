@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import exceptions.NoSpaceLeftException;
+
 public class UniformDistributeAlgorithm implements Algorithm {
     LocalTime nightStart = LocalTime.of(22, 0);
     LocalTime nightEnd = LocalTime.of(5, 0);
@@ -82,6 +84,7 @@ public class UniformDistributeAlgorithm implements Algorithm {
 
     public void reschedule(Schedule schedule) {
         List<TimeBlock> timeBlocks = schedule.getTimeBlocks();
+        List<TimeBlock> copyOfTimeBlocks = List.copyOf(timeBlocks); // use a copy to keep all ref
         Random random = new Random(seed); // for debugging
         Collections.shuffle(timeBlocks, random);  // Randomly shuffle tasks
         // sort by priority (using stable sort)
@@ -91,16 +94,28 @@ public class UniformDistributeAlgorithm implements Algorithm {
             }
             return o1.getTask().getPriority().compareTo(o2.getTask().getPriority());
         });
-        timeBlocks = List.copyOf(timeBlocks); // use a copy to keep all ref
+        
         schedule.getTimeBlocks().removeIf(t -> {
             return !t.getTask().isFixed();
         });
-        for (TimeBlock timeBlock : timeBlocks) {
-            Task task = timeBlock.getTask();
-            if (!task.isFixed()){
-                applyAlgorithm(schedule, task);
+
+        try {
+            for (TimeBlock timeBlock : copyOfTimeBlocks) {
+                Task task = timeBlock.getTask();
+                if (!task.isFixed()){
+                    var res = applyAlgorithm(schedule, task);
+                    if (res == null) {
+                        throw new NoSpaceLeftException();
+                    }
+                }
             }
+        } catch (NoSpaceLeftException e) {
+            // undo everything by restoring the state.
+            System.out.println("Could not reschedule and fit all blocks within calendar week");
+            schedule.getTimeBlocks().clear();
+            schedule.getTimeBlocks().addAll(copyOfTimeBlocks);
         }
+        
     }
 
     private void assignStartTimes(Schedule schedule) {

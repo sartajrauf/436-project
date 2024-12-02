@@ -10,8 +10,6 @@ import java.util.List;
 public class CalendarWeek {
 
 	private Schedule weekSchedule;
-	private LocalDateTime startTime;
-	private LocalDateTime endTime;
 	private String timeframeString;
 	
 	public CalendarWeek(LocalDateTime anyDate, Algorithm algorithm) {
@@ -19,9 +17,9 @@ public class CalendarWeek {
 		// We either use getFirstDayOfWeek() to get the absolute start of the week
 		// or getStartTime() to get the start of the allowed schedule of the week
 		// (for the algorithm)
-		this.startTime = anyDate.toLocalDate().atStartOfDay().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+		LocalDateTime startTime = anyDate.toLocalDate().atStartOfDay().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 		// this.startTime = anyDate;
-        this.endTime = startTime.plusDays(7);
+        LocalDateTime endTime = startTime.plusDays(7);
 
 		// Debug: Print start and end times for this week
 		System.out.println("Week Start (Expected Monday): " + startTime);
@@ -38,26 +36,26 @@ public class CalendarWeek {
 	}
 	
 	public LocalDateTime getStartTime() {
-		return startTime;
+		return weekSchedule.getStartTime();
 	}
 
 	public LocalDateTime getEndTime() {
-		return endTime;
+		return weekSchedule.getEndTime();
 	}
 
 	// Explicitly get the start of the week. Date is needed and not time.
 	public LocalDate getFirstDayOfWeek() {
-		return startTime.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate();
+		return weekSchedule.getStartTime().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate();
 	}
 
 	// Explicitly get the end of the week. Date is needed and not time.
 	public LocalDate getLastDayOfWeek() {
-		return startTime.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate().plusDays(6);
+		return weekSchedule.getStartTime().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate().plusDays(6);
 	}
 
 	// Explicitly get the next start of the week. Date is needed and not time.
 	public LocalDate getNextFirstDayOfWeek() {
-		return startTime.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate().plusDays(7);
+		return weekSchedule.getStartTime().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate().plusDays(7);
 	}
 
 	public String getTimeframeString() {
@@ -72,7 +70,7 @@ public class CalendarWeek {
 			return new ArrayList<>();
 		}
 		
-		LocalDateTime dayStart = startTime.plusDays(day - 1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+		LocalDateTime dayStart = getFirstDayOfWeek().plusDays(day - 1).atStartOfDay();
     	LocalDateTime dayEnd = dayStart.plusDays(1);
 		
 		List<TimeBlock> tasksForDay = new ArrayList<>();
@@ -88,11 +86,11 @@ public class CalendarWeek {
 	}
 
 	public void setStartTime(LocalDateTime newStartTime) {
-		startTime = newStartTime;
+		weekSchedule.setStartTime(newStartTime);
 	}
 
 	public void setEndTime(LocalDateTime newEndTime) {
-		endTime = newEndTime;
+		weekSchedule.setEndTime(newEndTime);
 	}
 
 	public LocalDate startOfWeek(LocalDate date){
