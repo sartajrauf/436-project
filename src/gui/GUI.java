@@ -82,6 +82,12 @@ public class GUI extends Application {
     @Override
     public void start(Stage primaryStage) {
 
+        // Set the window title
+        primaryStage.setTitle("Task Scheduler");
+
+        // Set the window icon (make sure you have an image file, e.g., "icon.png")
+        primaryStage.getIcons().add(new javafx.scene.image.Image("icon.png"));
+
         // Force it to close. For some reason it won't close. (Specifications
         // state that the JavaFX app closes when ALL Stage objects are closed)
         primaryStage.setOnCloseRequest(arg0 -> {
