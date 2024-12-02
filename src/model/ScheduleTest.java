@@ -26,7 +26,10 @@ public class ScheduleTest {
     // not required to do it this way.
     @BeforeEach
     public void setUp() {
-        schedule = new Schedule(LocalDateTime.of(2024, 10, 1, 0, 0), LocalDateTime.of(2024, 10, 2, 0, 0));
+        schedule = new Schedule(
+            LocalDateTime.of(2024, 10, 1, 0, 0),
+            LocalDateTime.of(2024, 10, 2, 0, 0),
+            new RandomAlgorithm());
         schedule.setAlgorithm(new SequentialAlgorithm());
         task1 = new Task("Task 1", 2.0);
         task2 = new Task("Task 2", 1.5);
@@ -51,7 +54,10 @@ public class ScheduleTest {
     // even been transfered over.
     @Test
     public void testMergeWithSimple() {
-        Schedule otherSchedule = new Schedule(LocalDateTime.of(2024, 10, 1, 0, 0), LocalDateTime.of(2024, 10, 2, 0, 0));
+        Schedule otherSchedule = new Schedule(
+            LocalDateTime.of(2024, 10, 1, 0, 0),
+            LocalDateTime.of(2024, 10, 2, 0, 0),
+            new RandomAlgorithm());
         schedule.addTask(task1);
         schedule.addTask(task2);
 
@@ -103,7 +109,10 @@ public class ScheduleTest {
     // have to be reorganized.
     @Test
     public void testMergeWith() {
-        Schedule otherSchedule = new Schedule(LocalDateTime.of(2024, 10, 1, 0, 0), LocalDateTime.of(2024, 10, 2, 0, 0));
+        Schedule otherSchedule = new Schedule(
+            LocalDateTime.of(2024, 10, 1, 0, 0),
+            LocalDateTime.of(2024, 10, 2, 0, 0),
+            new RandomAlgorithm());
         schedule.addTask(task1);
         schedule.addTask(task2);
         otherSchedule.addTask(task3);
@@ -120,7 +129,10 @@ public class ScheduleTest {
     // them by extending the time to include both the schedules.
     @Test
     public void testMergeWithTime() {
-        Schedule otherSchedule = new Schedule(LocalDateTime.of(2024, 10, 1, 0, 0), LocalDateTime.of(2024, 10, 2, 0, 0));
+        Schedule otherSchedule = new Schedule(
+            LocalDateTime.of(2024, 10, 1, 0, 0),
+            LocalDateTime.of(2024, 10, 2, 0, 0),
+            new RandomAlgorithm());
 
         LocalDateTime earliestTime = LocalDateTime.of(2024, 10, 1, 8, 0);
         LocalDateTime latestTime = LocalDateTime.of(2024, 10, 1, 16, 0);
@@ -138,7 +150,10 @@ public class ScheduleTest {
 
     @Test
     public void testIsBound() {
-        Schedule schedule = new Schedule(LocalDateTime.of(2024, 10, 1, 0, 0), LocalDateTime.of(2024, 10, 2, 0, 0));
+        Schedule schedule = new Schedule(
+            LocalDateTime.of(2024, 10, 1, 0, 0),
+            LocalDateTime.of(2024, 10, 2, 0, 0),
+            new RandomAlgorithm());
         LocalDateTime earliestTime = LocalDateTime.of(2024, 10, 1, 0, 0);
         LocalDateTime latestTime = LocalDateTime.of(2024, 10, 2, 0, 0);
         // inside (should work)
@@ -157,7 +172,10 @@ public class ScheduleTest {
 
     @Test
     public void testAddTimeBlockManually() {
-        Schedule schedule = new Schedule(LocalDateTime.of(2024, 10, 1, 0, 0), LocalDateTime.of(2024, 10, 2, 0, 0));
+        Schedule schedule = new Schedule(
+            LocalDateTime.of(2024, 10, 1, 0, 0),
+            LocalDateTime.of(2024, 10, 2, 0, 0),
+            new RandomAlgorithm());
         LocalDateTime earliestTime = LocalDateTime.of(2024, 10, 1, 0, 0);
         LocalDateTime latestTime = LocalDateTime.of(2024, 10, 2, 0, 0);
         // inside (should work)
@@ -177,7 +195,10 @@ public class ScheduleTest {
 
     @Test
     public void testCheckIfIntersectingNight(){
-        Schedule schedule = new Schedule(LocalDateTime.of(2024, 10, 1, 0, 0), LocalDateTime.of(2024, 10, 3, 0, 0));
+        Schedule schedule = new Schedule(
+            LocalDateTime.of(2024, 10, 1, 0, 0),
+            LocalDateTime.of(2024, 10, 3, 0, 0),
+            new RandomAlgorithm());
         LocalDateTime earliestTime = LocalDateTime.of(2024, 10, 1, 0, 0);
         LocalDateTime latestTime = LocalDateTime.of(2024, 10, 3, 0, 0);
         // use the random algorithm because it checks for night time

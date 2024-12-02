@@ -63,6 +63,14 @@ public class Task {
         return this.priority;
     }
 
+    public boolean isFixed() {
+        return fixed;
+    }
+
+    public void setFixed(boolean fixed) {
+        this.fixed = fixed;
+    }
+
     @Override
     public String toString() {
         return "Task{" +

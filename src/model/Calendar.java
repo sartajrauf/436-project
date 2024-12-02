@@ -9,11 +9,12 @@ public class Calendar {
 
 	private List<CalendarWeek> calendarWeeks;
 	private CalendarWeek currentWeek;
+	public Algorithm algorithm;
 
-	public Calendar(LocalDateTime startTime) {
-		
+	public Calendar(LocalDateTime startTime, Algorithm algorithm) {
+		this.algorithm = algorithm;
 		this.calendarWeeks = new LinkedList<>();
-		this.calendarWeeks.add(new CalendarWeek(startTime));
+		this.calendarWeeks.add(new CalendarWeek(startTime, algorithm));
 		this.currentWeek = calendarWeeks.get(0);
 		// loadWeeksFromFiles();
 	}
@@ -41,7 +42,7 @@ public class Calendar {
 			}
 		}
 		// doesn't exist. Make a new object
-		CalendarWeek newCalendarWeek = new CalendarWeek(date.atStartOfDay());
+		CalendarWeek newCalendarWeek = new CalendarWeek(date.atStartOfDay(), algorithm);
 		calendarWeeks.add(newCalendarWeek);
 		return newCalendarWeek;
 	}
@@ -89,7 +90,7 @@ public class Calendar {
 	
 	public void addNextWeek() {
 		LocalDateTime nextWeekStart = currentWeek.getStartTime().plusDays(7); // Increment by 7 days from the start of the current week
-        calendarWeeks.add(new CalendarWeek(nextWeekStart));
+        calendarWeeks.add(new CalendarWeek(nextWeekStart, algorithm));
 		//newWeekStart.getSchedule().saveTasksToFile("tasks_" + startTime.toLocalDate() + ".json");
     
 	}

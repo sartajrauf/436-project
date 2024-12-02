@@ -1,9 +1,11 @@
 package gui;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -41,6 +43,7 @@ import model.Schedule;
 import model.Scheduler;
 import model.Task;
 import model.TimeBlock;
+import model.UniformDistributeAlgorithm;
 
 public class GUI extends Application {
 
@@ -48,7 +51,9 @@ public class GUI extends Application {
     String loadedFileName = null;
 
     // backing structures
-    Calendar calendar = new Calendar(LocalDateTime.now());
+    Calendar calendar = new Calendar(
+        LocalDateTime.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
+        new UniformDistributeAlgorithm());
     CalendarWeek currentWeek = calendar.getCurrentWeek();
     ComboBox<Algorithm> algorithmComboBox = new ComboBox<>();
     SettingsPane settingsPane = new SettingsPane();
@@ -100,7 +105,7 @@ public class GUI extends Application {
         
         window.setCenter(taskPane);
 
-        algorithmComboBox.getItems().addAll(new RandomAlgorithm(), new PriorityAlgorithm());
+        algorithmComboBox.getItems().addAll(new UniformDistributeAlgorithm(), new RandomAlgorithm(), new PriorityAlgorithm());
         algorithmComboBox.getSelectionModel().selectFirst(); // Select the first algorithm by default
 
         BorderPane.setAlignment(settingsPane.getScrollPane(), Pos.CENTER_RIGHT);
@@ -231,6 +236,9 @@ public class GUI extends Application {
                     ((PriorityAlgorithm) currentAlgorithm).reschedule(currentWeek.getSchedule());
                 } else if (currentAlgorithm instanceof RandomAlgorithm) {
                     ((RandomAlgorithm) currentAlgorithm).reschedule(currentWeek.getSchedule());
+                } else if (currentAlgorithm instanceof UniformDistributeAlgorithm) {
+                    ((UniformDistributeAlgorithm) currentAlgorithm).reschedule(currentWeek.getSchedule());
+                    
                 }
                 
                 updateTable(currentWeek.getSchedule());

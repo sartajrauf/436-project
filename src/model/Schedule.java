@@ -30,11 +30,11 @@ public class Schedule {
     private Algorithm algorithm;
    //Algorithm selectedAlgorithm = Algorithm.RANDOM;
 
-    public Schedule(LocalDateTime startTime, LocalDateTime endTime) {
+    public Schedule(LocalDateTime startTime, LocalDateTime endTime, Algorithm algorithm) {
         this.timeBlocks = new ArrayList<>();
         this.startTime = startTime;
         this.endTime = endTime;
-        this.algorithm = new RandomAlgorithm(); //default for now
+        this.algorithm = algorithm;
     }
     public void saveTasksToFile(String filePath) {
         Gson gson = new GsonBuilder()

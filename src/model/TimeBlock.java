@@ -36,6 +36,12 @@ public class TimeBlock {
         this.endTime = startTime.plusHours((long) Math.ceil(task.getEstimatedTime())); // Estimate the duration based on task's estimated time
     }
 
+    public TimeBlock(LocalDateTime startTime, LocalDateTime endTime){
+        this.task = null;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
 
     // Getters
     public Task getTask() {

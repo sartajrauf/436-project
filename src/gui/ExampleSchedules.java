@@ -19,7 +19,7 @@ public class ExampleSchedules {
                         startOfWeek.withHour(10).withMinute(0)));
 
         schedule.addTimeBlockManually(
-                new TimeBlock(new Task("Meeting", 1, 8.5, startOfWeek.plusDays(1).withHour(14).withMinute(30), false),
+                new TimeBlock(new Task("Meeting", 1, 8.5, startOfWeek.plusDays(1).withHour(14).withMinute(30), true),
                         startOfWeek.plusDays(1).withHour(13).withMinute(0),
                         startOfWeek.plusDays(1).withHour(21).withMinute(30)));
 
@@ -34,7 +34,7 @@ public class ExampleSchedules {
                         startOfWeek.plusDays(2).withHour(16).withMinute(45)));
 
         schedule.addTimeBlockManually(
-                new TimeBlock(new Task("Lunch", 2, 1.0, startOfWeek.plusDays(3).withHour(13), false),
+                new TimeBlock(new Task("Lunch", 2, 1.0, startOfWeek.plusDays(3).withHour(13), true),
                         startOfWeek.plusDays(3).withHour(12).withMinute(0),
                         startOfWeek.plusDays(3).withHour(13).withMinute(0)));
 

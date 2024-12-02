@@ -58,4 +58,20 @@ public class RandomAlgorithm implements Algorithm {
             currentTime = newEndTime;
         }
     }
+
+    public LocalTime getNightStart() {
+        return nightStart;
+    }
+
+    public void setNightStart(LocalTime nightStart) {
+        this.nightStart = nightStart;
+    }
+
+    public LocalTime getNightEnd() {
+        return nightEnd;
+    }
+
+    public void setNightEnd(LocalTime nightEnd) {
+        this.nightEnd = nightEnd;
+    }
 }
