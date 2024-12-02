@@ -31,6 +31,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import model.Algorithm;
 import model.Calendar;
 import model.CalendarWeek;
@@ -73,7 +74,6 @@ public class GUI extends Application {
     private Button nextWeekButton = new Button(">");
     private Button addNewTaskButton = new Button("Add New Task");
     private Button rescheduleButton = new Button("Reschedule All");
-    private Button loadExampleButton = new Button("Load Example");
     private Button saveButton = new Button("Save Schedule");
     private Button saveAsButton = new Button("Save Schedule As");
     private Button loadButton = new Button("Load Schedule");
@@ -104,6 +104,25 @@ public class GUI extends Application {
 
         algorithmComboBox.getItems().addAll(new UniformDistributeAlgorithm(), new RandomAlgorithm(), new PriorityAlgorithm());
         algorithmComboBox.getSelectionModel().selectFirst(); // Select the first algorithm by default
+
+        algorithmComboBox.setConverter(new StringConverter<Algorithm>() {
+            @Override
+            public String toString(Algorithm algorithm) {
+                if (algorithm instanceof UniformDistributeAlgorithm) {
+                    return "Uniform";
+                } else if (algorithm instanceof RandomAlgorithm) {
+                    return "Random";
+                } else if (algorithm instanceof PriorityAlgorithm) {
+                    return "Priority";
+                }
+                return algorithm.toString();
+            }
+        
+            @Override
+            public Algorithm fromString(String string) {
+                return null;
+            }
+        });
 
         BorderPane.setAlignment(settingsPane.getScrollPane(), Pos.CENTER_RIGHT);
         window.setRight(settingsPane);
@@ -142,7 +161,6 @@ public class GUI extends Application {
         // update if the user resizes the screen
         setInitialElementSizes();
         setupEvents(primaryStage, scene);
-
 
         taskPane.updateDimensions(taskPane.getHeight(), taskPane.getWidth());
         taskPane.refresh();
