@@ -161,6 +161,8 @@ public class TaskPane extends BorderPane {
             // quick fix to hoverpane not showing in front
             drawContainer.getChildren().remove(hoverPane);
             drawContainer.getChildren().add(hoverPane);
+            drawContainer.getChildren().remove(currentTimeLine);
+            drawContainer.getChildren().add(currentTimeLine);
         });
     }
         
