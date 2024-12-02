@@ -157,6 +157,10 @@ public class TaskPane extends BorderPane {
 
             hoverPane.setLayoutX(dayCol*day_width);
             hoverPane.setLayoutY(hourRow*hour_height);
+
+            // quick fix to hoverpane not showing in front
+            drawContainer.getChildren().remove(hoverPane);
+            drawContainer.getChildren().add(hoverPane);
         });
     }
         
