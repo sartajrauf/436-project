@@ -409,6 +409,9 @@ public class TaskPane extends BorderPane {
         // Create a pane for the time block representation
         // Styling for visibility
         timeBlockPane.setStyle("-fx-background-color: lightblue; -fx-border-color: black; -fx-border-width: 1px;");
+        if (timeBlock.getTask().isFixed()) {
+            timeBlockPane.setStyle("-fx-background-color: cyan; -fx-border-color: black; -fx-border-width: 2px;");
+        }
         timeBlockPane.setCenter(new Label(timeBlock.getTask().getDescription())); // Set task description in the center
         timeBlockPane.setPrefHeight(blockHeight); // Set the height of the time block
         timeBlockPane.setMinHeight(blockHeight);
