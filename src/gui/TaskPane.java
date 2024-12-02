@@ -137,6 +137,8 @@ public class TaskPane extends BorderPane {
         hoverPane.setBackground(Background.fill(Paint.valueOf("gray")));
         hoverPane.setPrefSize(day_width, hour_height);
 
+        // remove just in case someone already added it
+        drawContainer.getChildren().remove(hoverPane);
         drawContainer.getChildren().add(hoverPane);
 
         drawContainer.setOnMouseMoved(eMouseEvent -> {
@@ -157,12 +159,6 @@ public class TaskPane extends BorderPane {
 
             hoverPane.setLayoutX(dayCol*day_width);
             hoverPane.setLayoutY(hourRow*hour_height);
-
-            // quick fix to hoverpane not showing in front
-            drawContainer.getChildren().remove(hoverPane);
-            drawContainer.getChildren().add(hoverPane);
-            drawContainer.getChildren().remove(currentTimeLine);
-            drawContainer.getChildren().add(currentTimeLine);
         });
     }
         
@@ -432,6 +428,15 @@ public class TaskPane extends BorderPane {
         return timeBlockPane;
     }
 
+    private void drawHoverPane() {
+        removeHoverPane();
+        drawContainer.getChildren().add(hoverPane);
+    }
+
+    private void removeHoverPane() {
+        drawContainer.getChildren().remove(hoverPane);
+    }
+
     private void undrawTimeBlocks() {
         drawContainer.getChildren().removeAll(timeBlockMap.values());
     }
@@ -459,9 +464,10 @@ public class TaskPane extends BorderPane {
     // for it...
     public void refresh(GUI gui, Schedule schedule) {
         removeAllTimeBlocks();
-        drawBackground();
-        drawGridLines();
-        drawCurrentTime();
+        // refresh is already being done by each iteration of "addTimeBlock"
+        // drawBackground();
+        // drawGridLines();
+        // drawCurrentTime();
         for (TimeBlock timeBlock : schedule.getTimeBlocks()) {
             addTimeBlock(timeBlock, gui.new HandleEditEvent(timeBlock));
         }
@@ -469,6 +475,7 @@ public class TaskPane extends BorderPane {
 
     public void refresh() {
         drawBackground();
+        drawHoverPane();
         drawGridLines();
         drawTimeBlocks();
         drawCurrentTime();
